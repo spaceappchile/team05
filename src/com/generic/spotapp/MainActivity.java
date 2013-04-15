@@ -6,6 +6,9 @@ import android.view.Menu;
 
 public class MainActivity extends Activity {
 
+	// indicates if the first time you open the application. FALTA
+	private boolean firsTime=true;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -14,7 +17,7 @@ public class MainActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// Inflate the menu; this adds items to the action bar if it is present.
+		
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
