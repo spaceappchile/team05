@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Spot App</string>
+    <string name="action_settings">Opciones</string>
+    <string name="action_map">Ver mapa</string>
+    <string name="action_next_sighting">Proximos avistamientos</string>
+    <string name="action_help">Ayuda</string>
+    <string name="action_about">Acerca</string>
+
+</resources>
