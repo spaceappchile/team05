@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title_activity_welcome">Welcome</string>
+    <string name="text_welcome">Welcome</string>
+    <string name="button_next">Next</string>
+</resources>
