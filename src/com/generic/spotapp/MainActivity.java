@@ -1,7 +1,6 @@
 package com.generic.spotapp;
 
 
-
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
@@ -9,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 
 public class MainActivity extends Activity {
 	
@@ -55,11 +55,27 @@ public class MainActivity extends Activity {
 		return true;
 	}
 	
+	// metodo que observa las pulsaciones del menu opciones
+	public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_map:
+            	goMaps();                	
+            	return true;               
+        }
+        return super.onOptionsItemSelected(item);
+    }
+	
 	private void goWelcome(){
 		Intent intent=new Intent(this, WelcomeActivity.class);
 		Log.i(INFO,"pantalla welcome");
     	startActivity(intent);
 	
+	}
+	
+	private void goMaps(){
+		Intent intent=new Intent(this, MapActivity.class);
+		Log.i(INFO, "pantalla maps");
+		startActivity(intent);
 	}
 
 }
