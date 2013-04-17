@@ -1,6 +1,8 @@
 package com.generic.spotapp;
 
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -49,9 +51,36 @@ public class MapActivity extends FragmentActivity {
     }
 	
 	private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(30, 70)).title("Marker"));
         
-        mMap.addMarker(new MarkerOptions().position(new LatLng(-30, 70)).title("Marker"));
     }
+	
+	private void showMarket(double lat, double lon, String mensaje){
+				
+	}
 
+	private void changeView(int mode){
+		
+		switch(mode){
+			case 0:
+				mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+	            break;
+			case 1:
+				mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+	            break;
+			case 2:
+				mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+	            break;
+			case 3:
+				mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
+	            break;
+		
+		}	
+	}
+	
+	private void changePos(float lat, float lon){
+		CameraUpdate camUpd1 = CameraUpdateFactory.newLatLng(new LatLng(lat, lon));
+		mMap.moveCamera(camUpd1);
+	}
+	
 }
