@@ -2,6 +2,7 @@ package com.generic.spotapp;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
@@ -20,6 +21,7 @@ public class OpenNotifyClient {
 		
 	
 	}
+	
 	
 	
 	public Coordinate getNow() throws ClientProtocolException, URISyntaxException, IOException, Error404, JSONException, ErrorOpenNofify
@@ -52,7 +54,6 @@ public class OpenNotifyClient {
 
 class Coordinate{
 	
-	
 	//coordinates in decimal degrees, like the coordinates in google maps
 	final float lat, lng;
 	
@@ -63,7 +64,31 @@ class Coordinate{
 		this.lng = lng;
 	}
 	
+	/**Calculate the distance between in kilometers using the haversine function */
+	public double distance(Coordinate other)
+	{
+	                                                                                                                          
+		     
+		     double lon1 = toRadians(this.lng);
+		     double lat1 = toRadians(this.lat);
+		     double lon2 = toRadians(other.lng);
+		     double lat2 = toRadians(other.lat);
+		    		 
+		    		 
+		     // haversine formula                                                                                                                                                  
+		     double dlon = lon2 - lon1;                                                                                                                                                  
+		     double dlat = lat2 - lat1;                                                                                                                                              
+		     double a = Math.pow(Math.sin(dlat/2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(dlon/2), 2);                                                                                                      
+		     double c = 2 * Math.asin(Math.sqrt(a));                                                                                                                                           
+		     double km = 6367 * c;                                                                                                                                                        
+		     return km*1000;
+	}
 	
+	
+	private double toRadians(float decimal)
+	{
+		return decimal * Math.PI / 180;
+	}
 
 }
 
