@@ -33,36 +33,50 @@ public class RestClient {
         
 
         
-        private String execute(HttpRequestBase request) throws URISyntaxException, ClientProtocolException, IOException
+        private String execute(HttpRequestBase request) throws URISyntaxException, ClientProtocolException, IOException, Error404
         {
         	  request.setURI(new URI(this.url));
+        	  URI url = request.getURI();
               HttpResponse response = client.execute(request);
+              
+              switch(response.getStatusLine().getStatusCode())
+              {
+              	case 404:
+              		throw new Error404("Error 404");
+              		
+              
+              }
+              
               HttpEntity entity = response.getEntity();
-              return EntityUtils.getContentCharSet(entity);
-                
+              return EntityUtils.toString(entity);
+              
+              
+
                 
         }
         
-        String performGet() throws ClientProtocolException, URISyntaxException, IOException
+        String performGet() throws ClientProtocolException, URISyntaxException, IOException, Error404
         {
         	HttpGet request = new HttpGet();
         	return this.execute(request);
         }
         
-        String performPut() throws ClientProtocolException, URISyntaxException, IOException
+        String performPut() throws ClientProtocolException, URISyntaxException, IOException, Error404
         {
         	HttpPut request = new HttpPut();
         	return this.execute(request);
+        	
+        	
         
         }
         
-        String performDelete() throws ClientProtocolException, URISyntaxException, IOException
+        String performDelete() throws ClientProtocolException, URISyntaxException, IOException, Error404
         {
         	HttpDelete request = new HttpDelete();
         	return this.execute(request);
         }
         
-        String performPost() throws ClientProtocolException, URISyntaxException, IOException
+        String performPost() throws ClientProtocolException, URISyntaxException, IOException, Error404
         {
         	HttpPost request = new HttpPost();
         	return this.execute(request);
@@ -70,4 +84,10 @@ public class RestClient {
         
 }
 
+
+class Error404 extends Exception {
+    public Error404(String message) {
+        super(message);
+    }
+}
 

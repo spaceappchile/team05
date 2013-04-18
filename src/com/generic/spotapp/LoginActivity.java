@@ -1,13 +1,28 @@
 package com.generic.spotapp;
 
+
+
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+
+import org.apache.http.client.ClientProtocolException;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.provider.Settings.Secure; //for the androidID unique identifier
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface.OnClickListener;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
@@ -99,55 +114,173 @@ public class LoginActivity extends Activity {
 	 * errors are presented and no actual login attempt is made.
 	 */
 	public void attemptLogin() {
-		if (mAuthTask != null) {
-			return;
-		}
 
-		// Reset errors.
-		mEmailView.setError(null);
-		mPasswordView.setError(null);
+				showProgress(true);
+		
+                String usr = mEmailView.getText().toString();
+                String password = mPasswordView.getText().toString();
+                
+                //check if the user provied an usr and password
 
-		// Store values at the time of the login attempt.
-		mEmail = mEmailView.getText().toString();
-		mPassword = mPasswordView.getText().toString();
+                if(usr.equals(""))
+                {
+                	mEmailView.setError("You have to give a user name");
+                	return;
+                }
+                
+                if(password.equals(""))
+                {
+                	mPasswordView.setError("You have to give a password");
+                	return;
+                	
+                }
 
-		boolean cancel = false;
-		View focusView = null;
+                //send a request to the database
+                
+                String LOGIN_URL = "http://10.0.2.2:8000/usuario/%s/%s/%s/";
+                
+                String android_id = Secure.getString(getBaseContext().getContentResolver(), Secure.ANDROID_ID); 
+                
+                String formated = String.format(LOGIN_URL, usr, password, android_id);
+                
+                RestClient rest = new RestClient(formated);
+                
+                String response = null;
+                
+                try {
+					 response = rest.performPost();
+					 
+					
+					 if(response == null)
+					 {
+						 showError("Can't get response from server");
+						 return;
+					 
+					 }
+					 
+				} catch (ClientProtocolException e) {
+					showError("Client protocol error");
+					return;
+				} catch (URISyntaxException e) {
+					showError("Bad URL");
+					return;
+				} catch (IOException e) {
+					showError("Conection Error");
+					return;
+				} catch (Error404 e) {
+					showError(e.getMessage());
+				}
+               
+                JSONObject json;
+                
+                try {
+					json = new JSONObject(response);
+				} catch (JSONException e) {
+					showError("Server response is not a valid json");
+					return;
+				}
+                
+                
+                String responseStr;
+                try {
+					responseStr = json.getString("response");
+				} catch (JSONException e) {
+					showError("Error parsing json");
+					return;
+				}
+                
+                
+                if(responseStr.equals("OK"))
+                {
+                	//everything is ok and we have register in the server
+                	showProgress(false);
+                
+                }else{
+                	//error, let's get the error
+                	
+                	String error = null;
+                	try{
+                		error = json.getString("cause");
+                		showError(error);
+                	
+                	} catch (JSONException e){
+    					showError("JSON parse error");
+    					return;
+                	}
+                	
+                	               	
+                }
+                
+                
 
-		// Check for a valid password.
-		if (TextUtils.isEmpty(mPassword)) {
-			mPasswordView.setError(getString(R.string.error_field_required));
-			focusView = mPasswordView;
-			cancel = true;
-		} else if (mPassword.length() < 4) {
-			mPasswordView.setError(getString(R.string.error_invalid_password));
-			focusView = mPasswordView;
-			cancel = true;
-		}
+                //if (mAuthTask != null) {
+                        //return;
+                //}
 
-		// Check for a valid email address.
-		if (TextUtils.isEmpty(mEmail)) {
-			mEmailView.setError(getString(R.string.error_field_required));
-			focusView = mEmailView;
-			cancel = true;
-		} else if (!mEmail.contains("@")) {
-			mEmailView.setError(getString(R.string.error_invalid_email));
-			focusView = mEmailView;
-			cancel = true;
-		}
+                //// Reset errors.
+                //mEmailView.setError(null);
+                //mPasswordView.setError(null);
 
-		if (cancel) {
-			// There was an error; don't attempt login and focus the first
-			// form field with an error.
-			focusView.requestFocus();
-		} else {
-			// Show a progress spinner, and kick off a background task to
-			// perform the user login attempt.
-			mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
-			showProgress(true);
-			mAuthTask = new UserLoginTask();
-			mAuthTask.execute((Void) null);
-		}
+                //// Store values at the time of the login attempt.
+                //mEmail = mEmailView.getText().toString();
+                //mPassword = mPasswordView.getText().toString();
+
+                //boolean cancel = false;
+                //View focusView = null;
+
+                //// Check for a valid password.
+                //if (TextUtils.isEmpty(mPassword)) {
+                        //mPasswordView.setError(getString(R.string.error_field_required));
+                        //focusView = mPasswordView;
+                        //cancel = true;
+                //} else if (mPassword.length() < 4) {
+                        //mPasswordView.setError(getString(R.string.error_invalid_password));
+                        //focusView = mPasswordView;
+                        //cancel = true;
+                //}
+
+                //// Check for a valid email address.
+                //if (TextUtils.isEmpty(mEmail)) {
+                        //mEmailView.setError(getString(R.string.error_field_required));
+                        //focusView = mEmailView;
+                        //cancel = true;
+                //} else if (!mEmail.contains("@")) {
+                        //mEmailView.setError(getString(R.string.error_invalid_email));
+                        //focusView = mEmailView;
+                        //cancel = true;
+                //}
+
+                //if (cancel) {
+                        //// There was an error; don't attempt login and focus the first
+                        //// form field with an error.
+                        //focusView.requestFocus();
+                //} else {
+                        //// Show a progress spinner, and kick off a background task to
+                        //// perform the user login attempt.
+                        //mLoginStatusMessageView.setText(R.string.login_progress_signing_in);
+                        //showProgress(true);
+                        //mAuthTask = new UserLoginTask();
+                        //mAuthTask.execute((Void) null);
+                //}
+	}
+	
+	
+	private void showError(String msg)
+	{
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		 
+	    builder.setTitle("Error");
+	    builder.setMessage(msg);
+	    
+	    
+	    builder.setPositiveButton("OK", null);
+	    
+	 
+	    builder.create();
+	    
+	    showProgress(false);
+	    
+	    builder.show();
 	}
 
 	/**

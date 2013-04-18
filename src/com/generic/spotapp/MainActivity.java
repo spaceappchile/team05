@@ -19,6 +19,8 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		
+		
 		// referencia a la coleccion de preferencias, para guardar preferencias en el dispositivo
 		SharedPreferences prefs = getSharedPreferences(getString(R.string.preference_file_key),Context.MODE_PRIVATE);
 		/*
@@ -28,7 +30,9 @@ public class MainActivity extends Activity {
 		 * parametro de la funcion.
 		 * En este caso devuelve true
 		 * 		 	
-		 */		 
+		 */		
+		
+		prefs.edit().clear().commit();
 		boolean firstTime = prefs.getBoolean("firstTime", true);
 		
 		if(firstTime){
