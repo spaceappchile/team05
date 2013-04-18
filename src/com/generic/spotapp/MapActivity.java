@@ -15,6 +15,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
 import android.location.Criteria;
+import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
@@ -41,6 +42,9 @@ public class MapActivity extends FragmentActivity {
 		setContentView(R.layout.activity_map);
 		setUpMapIfNeeded();
 		gpsOn();
+		getKnownPos();
+		getActualPos();
+		
 	}
 	
 	@Override
@@ -121,6 +125,12 @@ public class MapActivity extends FragmentActivity {
 	private void showMarket(double lat, double lon, String mensaje){
 		mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(mensaje));				
 	}
+	private void showMarket(Location loc ,String mensaje){
+		if(loc!=null)
+			mMap.addMarker(new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude())).title(mensaje));
+		else
+			Log.i(INFO,"loc es null CTM");
+	}
 
 	private void changeView(int mode){
 		
@@ -150,6 +160,8 @@ public class MapActivity extends FragmentActivity {
 	    startActivity(settingsIntent);		
 	}
 	
+	
+	
 	private void gpsOn(){
 		// para acceder a los servicios de localizacion
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
@@ -171,7 +183,55 @@ public class MapActivity extends FragmentActivity {
 			Log.d("PRUEBA GPS", "GPS apagado");
 		}
 	}
-	private void getPos(){
+	
+	
+	private void getKnownPos(){
+		String locationProvider = LocationManager.GPS_PROVIDER;
+		
+		Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
+		showMarket(lastKnownLocation, "Tu posicion");
+	}
+	
+	private void getActualPos(){
+
+		//Obtenemos una referencia al LocationManager
+		locationManager =
+	        (LocationManager)getSystemService(Context.LOCATION_SERVICE);
+	 
+	    //Obtenemos la última posición conocida
+	    Location loc =
+	    		locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+	    
+	    showMarket(loc, "Tu posicion");
+	    
+	    listener = new LocationListener() {			
+			//Lanzado cada vez que se recibe una actualización de la posición.
+		    @Override
+		    public void onLocationChanged(Location location) {
+		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );
+		    	showMarket(location,"Tu posicion");		    	
+		    }
+		    
+			//Lanzado cuando el proveedor se deshabilita.
+			@Override
+			public void onProviderDisabled(String provider) {		
+
+			}
+			
+			//Lanzado cuando el proveedor se habilita.
+			@Override
+			public void onProviderEnabled(String provider) {
+			
+			}
+			
+			// Lanzado cada vez que el proveedor cambia 
+			// su estado, que puede variar entre OUT_OF_SERVICE, TEMPORARILY_UNAVAILABLE, AVAILABLE.
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+				Log.i("LocAndroid", "Provider Status: " + status);				
+			}		    
+		};	
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, listener);
 	
 	}
 }
