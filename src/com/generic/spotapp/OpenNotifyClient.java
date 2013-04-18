@@ -5,6 +5,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import org.apache.http.client.ClientProtocolException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,7 +22,42 @@ public class OpenNotifyClient {
 		
 	
 	}
+
 	
+	public ArrayList<Pass> getPass(int n, float lat, float lng) throws ClientProtocolException, URISyntaxException, IOException, Error404, JSONException, ErrorOpenNofify
+	{
+		ArrayList<Pass> passArray = new ArrayList();
+		
+		String url = String.format(PASS_TIME_URL, n, lat, lng);
+		
+		
+		RestClient client = new RestClient(url);
+		String response = client.performGet();
+		JSONObject json = new JSONObject(response);
+		
+		String message = json.getString("message");
+		if(message.equals(message))
+		{
+			JSONArray positions = json.getJSONArray("response");
+			
+			for(int i = 0; i < positions.length(); i++)
+			{
+				JSONObject pos = positions.getJSONObject(i);
+				
+				int duration = Integer.parseInt(pos.getString("duration"));
+				int risetime = Integer.parseInt(pos.getString("risetime"));
+				
+				passArray.add(new Pass(duration, risetime));
+				
+			}
+			
+			return passArray;
+			
+		}else{
+			throw new ErrorOpenNofify(message);
+		}
+		
+	}
 	
 	
 	public Coordinate getNow() throws ClientProtocolException, URISyntaxException, IOException, Error404, JSONException, ErrorOpenNofify
@@ -89,7 +125,16 @@ class Coordinate{
 	{
 		return decimal * Math.PI / 180;
 	}
+}
 
+class Pass{
+	final int duration, risetime;
+	
+	Pass(int duration, int risetime)
+	{
+		this.duration = duration;
+		this.risetime = risetime;
+	}
 }
 
 
