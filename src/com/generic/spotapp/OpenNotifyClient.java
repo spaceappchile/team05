@@ -23,7 +23,14 @@ public class OpenNotifyClient {
 	
 	}
 
-	
+	/**Return a list of Pass objects with the future ISS pass at the given coordinates
+	 * 
+	 * @param n Number of pass objects to return. 1 <= n <= 100
+	 * @param lat Latitude of the current position of the device in decimal degrees
+	 * @param lng Longitude of the current position of the device in decimal degrees
+	 * 
+	 * @return A ArrayList of Pass objects in order of time.
+	 * */
 	public ArrayList<Pass> getPass(int n, float lat, float lng) throws ClientProtocolException, URISyntaxException, IOException, Error404, JSONException, ErrorOpenNofify
 	{
 		ArrayList<Pass> passArray = new ArrayList();
@@ -45,7 +52,7 @@ public class OpenNotifyClient {
 				JSONObject pos = positions.getJSONObject(i);
 				
 				int duration = Integer.parseInt(pos.getString("duration"));
-				int risetime = Integer.parseInt(pos.getString("risetime"));
+				long risetime = Long.parseLong(pos.getString("risetime"));
 				
 				passArray.add(new Pass(duration, risetime));
 				
@@ -59,7 +66,8 @@ public class OpenNotifyClient {
 		
 	}
 	
-	
+	/**Get the current coordinates of the ISS
+	 * */
 	public Coordinate getNow() throws ClientProtocolException, URISyntaxException, IOException, Error404, JSONException, ErrorOpenNofify
 	{
 		RestClient client = new RestClient(this.CURRENT_URL);
@@ -88,6 +96,7 @@ public class OpenNotifyClient {
 
 
 
+/**A class of coordinates*/
 class Coordinate{
 	
 	//coordinates in decimal degrees, like the coordinates in google maps
@@ -127,10 +136,21 @@ class Coordinate{
 	}
 }
 
+
+
+/**Pass class with the duration and risetime
+ * */
 class Pass{
-	final int duration, risetime;
 	
-	Pass(int duration, int risetime)
+	//duration: Number of seconds the pass will last
+	
+	final int duration;
+	
+	//unix time stamp when the ISS will be above 10°
+	final long risetime;
+	
+	
+	Pass(int duration, long risetime)
 	{
 		this.duration = duration;
 		this.risetime = risetime;
