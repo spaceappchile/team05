@@ -3,8 +3,7 @@ package com.generic.spotapp;
 /* TODO crear funcion que tome la base de datos con los avistamientos y
  * 		crea las marcas
  * TODO mostrar info en los marcadores creados, la fecha, 
- * 
- * 
+ *
  */
 		
 
@@ -16,6 +15,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.DialogInterface.OnClickListener;
+import android.graphics.Color;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -51,8 +52,7 @@ public class MapActivity extends FragmentActivity {
 		setContentView(R.layout.activity_map);	
 		
 		gpsOn();
-		setUpMapIfNeeded();			
-		
+		setUpMapIfNeeded();	
 	}
 	
 	@Override
@@ -98,7 +98,7 @@ public class MapActivity extends FragmentActivity {
 		    return dialogo;
 	}
 		
-		// configuracion del mensaje/dialogo
+	// configuracion del mensaje/dialogo
 	private Dialog crearDialogoConfirmacion(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		 
@@ -132,8 +132,9 @@ public class MapActivity extends FragmentActivity {
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
+            	// MyLocation es para obtener la posicion
             	mMap.setMyLocationEnabled(true);
-            	
+           
             	//getKnownPos();
         		//getActualPos();
                 setUpMap();
@@ -150,27 +151,11 @@ public class MapActivity extends FragmentActivity {
 			Log.i(INFO,"Mylocation is null");
 		
 		addmarkers();
+		dibujaEstacion();
 		
     }
-	
-	private void showMarket(double lat, double lon, String mensaje){
-		MarkerOptions marker = new MarkerOptions().position(new LatLng(lat, lon));
-		marker.title(mensaje);
-		mMap.addMarker(marker);				
-	}
-	private void showMarket(Location loc ,String mensaje){
-		if( loc!=null){
-			MarkerOptions marker = new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude()));
-			marker.title(mensaje);
-									
-			mMap.addMarker(marker);
-		}		
-		else{
-			Log.i(INFO,"loc es null CTM");
-		}
-	}
 
-	private void changeView(int mode){
+	private void changeModeMap(int mode){
 		
 		switch(mode){
 			case 0:
@@ -184,8 +169,7 @@ public class MapActivity extends FragmentActivity {
 	            break;
 			case 3:
 				mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-	            break;
-		
+	            break;		
 		}	
 	}
 	
@@ -209,6 +193,9 @@ public class MapActivity extends FragmentActivity {
 		Log.i(INFO, "Camara movida");
 	}
 	
+	/*
+	 * Cambia la vista en el mapa, con zoom
+	 */
 	private void changePosCam2(Location loc){		
 		CameraPosition camPos = new CameraPosition.Builder()
         .target( new LatLng(loc.getLatitude(), loc.getLongitude()))   
@@ -291,8 +278,7 @@ public class MapActivity extends FragmentActivity {
 			@Override
 			public void onProviderEnabled(String provider) {
 			
-			}
-			
+			}			
 			// Lanzado cada vez que el proveedor cambia 
 			// su estado, que puede variar entre OUT_OF_SERVICE, TEMPORARILY_UNAVAILABLE, AVAILABLE.
 			@Override
@@ -300,18 +286,39 @@ public class MapActivity extends FragmentActivity {
 				Log.i("LocAndroid", "Provider Status: " + status);				
 			}		    
 		};	
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, listener);	
-	}
-	private void addmarkers(){		
-		LatLng ln = new LatLng(-33.44989201,-70.68687829);
-		mMap.addMarker(new MarkerOptions()
-	    .position(ln)
-	    .title("Avistamiento")
-	    .snippet("el dia tanto...")
-	    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ojo)));	
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60*1000*10, 20, listener);	
 	}
 	
+	/*
+	 * Para agregar varios avistamientos
+	 */	
+	private void addmarkers(){		
+		addmarker(-33.44989201, -70.68687829, "Avistamiento", "el dia ...");	
+	}
+	
+	/* agrega un avistamiento
+	 * usa la imagen del ojo
+	 */
+	private void addmarker(double lat, double lng, String mensaje, String detalle){
+		LatLng ln = new LatLng(lat,lng);
+		mMap.addMarker(new MarkerOptions()
+	    .position(ln)
+	    .title(mensaje)
+	    .snippet(detalle)
+	    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ojo)));		
+	}
+	
+	private void dibujaEstacion(){		
+		LatLng l1 = new LatLng(0,0);
+		LatLng l2 = new LatLng(45,5);
+		mMap.addPolyline((new PolylineOptions())
+               .add(l1, l2)
+                .width(5)
+                .color(Color.BLUE)
+                .geodesic(true));
+	}	
 }
+	
 
 
 
