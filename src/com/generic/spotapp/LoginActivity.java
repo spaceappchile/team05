@@ -29,6 +29,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.google.android.gcm.*;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -62,7 +63,14 @@ public class LoginActivity extends Activity {
 	private View mLoginFormView;
 	private View mLoginStatusView;
 	private TextView mLoginStatusMessageView;
-
+	
+	
+	private static final String LOGIN_URL = "http://10.0.2.2:8000/login/%s/%s/%s/%s/%s/%s/";
+	private static final String CREATE_URL = "http://10.0.2.2:8000/usuario/%s/%s/%s/";
+	private float lat, lng;
+	private static final String PROYECT_ID = "211948616229";
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -137,11 +145,11 @@ public class LoginActivity extends Activity {
 
                 //send a request to the database
                 
-                String LOGIN_URL = "http://10.0.2.2:8000/usuario/%s/%s/%s/";
+              
                 
                 String android_id = Secure.getString(getBaseContext().getContentResolver(), Secure.ANDROID_ID); 
                 
-                String formated = String.format(LOGIN_URL, usr, password, android_id);
+                String formated = String.format(CREATE_URL, usr, password, android_id);
                 
                 RestClient rest = new RestClient(formated);
                 
@@ -153,22 +161,22 @@ public class LoginActivity extends Activity {
 					
 					 if(response == null)
 					 {
-						 showError("Can't get response from server");
+						 Utils.showError("Can't get response from server", this);
 						 return;
 					 
 					 }
 					 
 				} catch (ClientProtocolException e) {
-					showError("Client protocol error");
+					Utils.showError("Client protocol error", this);
 					return;
 				} catch (URISyntaxException e) {
-					showError("Bad URL");
+					Utils.showError("Bad URL", this);
 					return;
 				} catch (IOException e) {
-					showError("Conection Error");
+					Utils.showError("Conection Error", this);
 					return;
 				} catch (Error404 e) {
-					showError(e.getMessage());
+					Utils.showError(e.getMessage(), this);
 				}
                
                 JSONObject json;
@@ -176,7 +184,7 @@ public class LoginActivity extends Activity {
                 try {
 					json = new JSONObject(response);
 				} catch (JSONException e) {
-					showError("Server response is not a valid json");
+					Utils.showError("Server response is not a valid json", this);
 					return;
 				}
                 
@@ -185,7 +193,7 @@ public class LoginActivity extends Activity {
                 try {
 					responseStr = json.getString("response");
 				} catch (JSONException e) {
-					showError("Error parsing json");
+					Utils.showError("Error parsing json", this);
 					return;
 				}
                 
@@ -193,7 +201,9 @@ public class LoginActivity extends Activity {
                 if(responseStr.equals("OK"))
                 {
                 	//everything is ok and we have register in the server
+                	loginUser(usr, password, android_id);
                 	showProgress(false);
+                	
                 
                 }else{
                 	//error, let's get the error
@@ -201,10 +211,13 @@ public class LoginActivity extends Activity {
                 	String error = null;
                 	try{
                 		error = json.getString("cause");
-                		showError(error);
+                		if(error.equals("User exists"))
+                		{
+                			loginUser(usr, password, android_id);
+                		}
                 	
                 	} catch (JSONException e){
-    					showError("JSON parse error");
+    					Utils.showError("JSON parse error", this);
     					return;
                 	}
                 	
@@ -265,24 +278,80 @@ public class LoginActivity extends Activity {
 	}
 	
 	
-	private void showError(String msg)
+	public void setLat(float lat)
 	{
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		 
-	    builder.setTitle("Error");
-	    builder.setMessage(msg);
-	    
-	    
-	    builder.setPositiveButton("OK", null);
-	    
-	 
-	    builder.create();
-	    
-	    showProgress(false);
-	    
-	    builder.show();
+		this.lat = lat;
 	}
+	
+	public void setLng(float lng)
+	{
+		this.lng = lng;
+	}
+	
+	
+	private void loginUser(String usuario, String clave, String android_id)
+	{
+	   // Registrarse contra los servidores de GCM como cliente capaz de recibir mensajes.
+	   // Almacenar el “Registration ID” recibido como resultado del registro anterior.
+	   // Comunicar a la aplicación web el “Registration ID” de forma que ésta pueda enviarle mensajes.
+	   // Recibir y procesar los mensajes desde el servidor de GCM.
 
+		
+		//revisamos si tenemos las dependencias instaladas
+		
+		
+		
+		//nos registramos gcm como cliente
+		String id = GCMRegistrar.getRegistrationId(this);
+		
+		if(id.equals(""))
+		{
+			GCMRegistrar.register(this, PROYECT_ID);
+			id = GCMRegistrar.getRegistrationId(this);
+		}
+		
+		//estamos listos con el registro con el server de google
+		
+		String formated = String.format(LOGIN_URL, usuario, clave, android_id, id, Float.toString(this.lat), Float.toString(this.lng));
+		
+		RestClient rest = new RestClient(formated);
+		
+		String response;
+	
+		try {
+			response = rest.performPut();
+		} catch (ClientProtocolException e) {
+			return;
+		} catch (URISyntaxException e) {
+			return;
+		} catch (IOException e) {
+			return;
+		} catch (Error404 e) {
+			return;
+		}
+		
+		
+		JSONObject json;
+		
+		try {
+			json = new JSONObject(response);
+			String error = json.getString("response");
+			if(error.equals("ERROR"))
+			{
+				return;
+			}else{
+				//OK
+				Utils.showError("Ok", this);
+			}
+		} catch (JSONException e) {
+			return;
+		}
+		
+		
+		
+	}
+	
+	
 	/**
 	 * Shows the progress UI and hides the login form.
 	 */
