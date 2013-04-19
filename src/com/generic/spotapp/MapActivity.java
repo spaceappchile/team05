@@ -1,10 +1,19 @@
 package com.generic.spotapp;
 
+/* TODO crear funcion que tome la base de datos con los avistamientos y
+ * 		crea las marcas
+ * TODO mostrar info en los marcadores creados, la fecha, 
+ * 
+ * 
+ */
+		
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
@@ -30,20 +39,19 @@ public class MapActivity extends FragmentActivity {
 	private static final int DIALOGO_CONFIRMACION = 0;
 	
 	private GoogleMap mMap;
-	private LatLng position;
 	private LocationListener listener;
 	private LocationManager locationManager;
+	private Location loc;
 	private Criteria criteria;
 	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);
-		setUpMapIfNeeded();
+		setContentView(R.layout.activity_map);	
+		
 		gpsOn();
-		getKnownPos();
-		getActualPos();
+		setUpMapIfNeeded();			
 		
 	}
 	
@@ -51,7 +59,19 @@ public class MapActivity extends FragmentActivity {
     protected void onResume() {
 		super.onResume();
         setUpMapIfNeeded();
+        
+        getKnownPos();
+        getActualPos();
     }
+	
+	@Override
+	protected void onStop(){
+		super.onStop();
+		// Remove the listener you previously added
+		locationManager.removeUpdates(listener);
+		Log.i(INFO, "no obtener posicion");
+	}
+
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -61,11 +81,10 @@ public class MapActivity extends FragmentActivity {
 	}
 	
 	// crea los dialogos
-		protected Dialog onCreateDialog(int id) {
-		    Dialog dialogo = null;
+	protected Dialog onCreateDialog(int id) {
+		   	Dialog dialogo = null;
 		 
-		    switch(id)
-		    {
+		    switch(id){
 		        case DIALOGO_CONFIRMACION:
 		            dialogo = crearDialogoConfirmacion();
 		            break;
@@ -77,32 +96,33 @@ public class MapActivity extends FragmentActivity {
 		    }
 		 
 		    return dialogo;
-		}
+	}
 		
 		// configuracion del mensaje/dialogo
-		private Dialog crearDialogoConfirmacion()
-		{
-		    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+	private Dialog crearDialogoConfirmacion(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		 
-		    builder.setTitle("Confirmacion");
-		    builder.setMessage("¿activar GPS?");
-		    
-		    builder.setPositiveButton("Aceptar", new OnClickListener() {
-		    public void onClick(DialogInterface dialog, int which) {
-		        Log.i(INFO, "Confirmacion Aceptada.");
-		        activarGps();
-		        dialog.cancel();
-		    }
-		    });
-		    builder.setNegativeButton("Cancelar", new OnClickListener() {
+		builder.setTitle("Confirmacion");
+		builder.setMessage("¿activar GPS?");
+		  
+		builder.setPositiveButton("Aceptar", new OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				Log.i(INFO, "Confirmacion Aceptada.");
+				activarGps();
+				dialog.cancel();
+			}
+		});
+		builder.setNegativeButton("Cancelar", new OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
 		        Log.i(INFO, "Confirmacion Cancelada.");
 		        dialog.cancel();
 		    }
-		    });
+		});
 		 
-		    return builder.create();
-		}
+	    return builder.create();
+	}
+	
+	
 	
 	private void setUpMapIfNeeded() {
         // Do a null check to confirm that we have not already instantiated the map.
@@ -112,24 +132,42 @@ public class MapActivity extends FragmentActivity {
                     .getMap();
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
+            	mMap.setMyLocationEnabled(true);
+            	
+            	//getKnownPos();
+        		//getActualPos();
                 setUpMap();
             }
         }
     }
 	
 	private void setUpMap() {
-        showMarket(0,0,"aaaa");
-        
+		Location loc = mMap.getMyLocation();
+		
+		if(loc!=null)
+			changePosCam2(loc);
+		else
+			Log.i(INFO,"Mylocation is null");
+		
+		addmarkers();
+		
     }
 	
 	private void showMarket(double lat, double lon, String mensaje){
-		mMap.addMarker(new MarkerOptions().position(new LatLng(lat, lon)).title(mensaje));				
+		MarkerOptions marker = new MarkerOptions().position(new LatLng(lat, lon));
+		marker.title(mensaje);
+		mMap.addMarker(marker);				
 	}
 	private void showMarket(Location loc ,String mensaje){
-		if(loc!=null)
-			mMap.addMarker(new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude())).title(mensaje));
-		else
+		if( loc!=null){
+			MarkerOptions marker = new MarkerOptions().position(new LatLng(loc.getLatitude(), loc.getLongitude()));
+			marker.title(mensaje);
+									
+			mMap.addMarker(marker);
+		}		
+		else{
 			Log.i(INFO,"loc es null CTM");
+		}
 	}
 
 	private void changeView(int mode){
@@ -151,27 +189,60 @@ public class MapActivity extends FragmentActivity {
 		}	
 	}
 	
-	private void changePos(float lat, float lon){
+	private void changePosCam(double lat, double lon){
 		CameraUpdate camUpd1 = CameraUpdateFactory.newLatLng(new LatLng(lat, lon));
-		mMap.moveCamera(camUpd1);
+		mMap.moveCamera(camUpd1);    
 	}
+	
+	private void changePosCam2(double lat, double lon){		
+		CameraPosition camPos = new CameraPosition.Builder()
+        .target( new LatLng(lat, lon))   
+        .zoom(16)         
+        .bearing(0)      
+        .tilt(0)         
+        .build();
+		
+		CameraUpdate camUpd =
+			    CameraUpdateFactory.newCameraPosition(camPos);
+		
+		mMap.moveCamera(camUpd);
+		Log.i(INFO, "Camara movida");
+	}
+	
+	private void changePosCam2(Location loc){		
+		CameraPosition camPos = new CameraPosition.Builder()
+        .target( new LatLng(loc.getLatitude(), loc.getLongitude()))   
+        .zoom(16)         
+        .bearing(0)      
+        .tilt(0)         
+        .build();
+		
+		CameraUpdate camUpd =
+			    CameraUpdateFactory.newCameraPosition(camPos);
+		
+		mMap.moveCamera(camUpd);
+		Log.i(INFO, "Camara movida");
+	}
+	
+	
 	public void activarGps(){
 		Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 	    startActivity(settingsIntent);		
 	}
 	
 	
-	
+	// aacede a los servicios de localizacion y sale un mensaje para activar el gps
 	private void gpsOn(){
 		// para acceder a los servicios de localizacion
 		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 		
 		// criterios
-		Criteria criteria = new Criteria();
+		criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE); // localizacion exacta
         criteria.setCostAllowed(false); 			  // sin costo monetario
         // pregunta si hay un proveedor con estas caracteristicas
         String providerName = locationManager.getBestProvider(criteria, true);
+        Log.i(INFO,"bestProvider: " + providerName);
         
         // retorna true, si el gps esta activado		
         final boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -184,12 +255,13 @@ public class MapActivity extends FragmentActivity {
 		}
 	}
 	
-	
+	// obtiene la posicion conocida
 	private void getKnownPos(){
 		String locationProvider = LocationManager.GPS_PROVIDER;
+		Log.i(INFO, "locationProvider: "+ locationProvider);
 		
-		Location lastKnownLocation = locationManager.getLastKnownLocation(locationProvider);
-		showMarket(lastKnownLocation, "Tu posicion");
+		loc = locationManager.getLastKnownLocation(locationProvider);
+		//showMarket(loc, "Tu posicion");
 	}
 	
 	private void getActualPos(){
@@ -198,18 +270,15 @@ public class MapActivity extends FragmentActivity {
 		locationManager =
 	        (LocationManager)getSystemService(Context.LOCATION_SERVICE);
 	 
-	    //Obtenemos la última posición conocida
-	    Location loc =
-	    		locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-	    
-	    showMarket(loc, "Tu posicion");
+	    	    
+	    //showMarket(loc, "Tu posicion");
 	    
 	    listener = new LocationListener() {			
 			//Lanzado cada vez que se recibe una actualización de la posición.
 		    @Override
 		    public void onLocationChanged(Location location) {
-		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );
-		    	showMarket(location,"Tu posicion");		    	
+		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );		    	
+		    	//showMarket(location,"Tu posicion");			    		    	
 		    }
 		    
 			//Lanzado cuando el proveedor se deshabilita.
@@ -231,7 +300,20 @@ public class MapActivity extends FragmentActivity {
 				Log.i("LocAndroid", "Provider Status: " + status);				
 			}		    
 		};	
-		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, listener);
-	
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 30000, 0, listener);	
 	}
+	private void addmarkers(){		
+		LatLng ln = new LatLng(-33.44989201,-70.68687829);
+		mMap.addMarker(new MarkerOptions()
+	    .position(ln)
+	    .title("Avistamiento")
+	    .snippet("el dia tanto...")
+	    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ojo)));	
+	}
+	
 }
+
+
+
+
+
