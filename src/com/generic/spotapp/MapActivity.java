@@ -7,6 +7,7 @@ package com.generic.spotapp;
  */
 		
 
+
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -33,6 +34,9 @@ import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.CheckBox;
 
 public class MapActivity extends FragmentActivity {
 	
@@ -45,14 +49,23 @@ public class MapActivity extends FragmentActivity {
 	private Location loc;
 	private Criteria criteria;
 	
+	private MenuItem modeNormal;
+	private MenuItem modeHybrid;
+	private MenuItem modeSatellite;
+	private MenuItem modeTerrain;	
+	
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);	
 		
+		
+		
 		gpsOn();
-		setUpMapIfNeeded();	
+		setUpMapIfNeeded();
+		
+		modeNormal=(MenuItem) findViewById(R.id.change_normal);
 	}
 	
 	@Override
@@ -77,7 +90,80 @@ public class MapActivity extends FragmentActivity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.map, menu);
+		
 		return true;
+	}
+	
+	@Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        super.onPrepareOptionsMenu(menu);
+        
+        int mode = mMap.getMapType();
+        
+        switch(mode){
+       		case 1:
+       			modeNormal = menu.findItem(R.id.change_normal);
+       			modeNormal.isChecked();
+       			Log.i(INFO,"is checked");
+       			break;
+			case 2:
+				
+	            break;
+			case 3:
+				
+	            break;
+			case 4:
+				
+	            break;	        
+        }               
+        
+        return true;        
+    }
+	
+	 public boolean onMenuItemSelected(int id, MenuItem item){
+		 
+		 switch (item.getItemId()) {
+	    	case R.id.change_normal:    		
+	    		modeNormal = (MenuItem) findViewById(R.id.change_normal);
+	            return true;   
+	            
+	    	case R.id.change_satellite:
+	    		changeModeMap(2);
+	    		return true;	
+	    		
+	    	case R.id.change_terrain:
+	    		changeModeMap(3);
+	    		return true;
+	    		
+	    	case R.id.change_hybrid:
+	    		changeModeMap(4);
+	    		return true;
+		 }
+		 
+		 return true;		 
+	 }
+	
+	// metodo que observa las pulsaciones del menu opciones
+	public boolean onOptionsItemSelected(MenuItem item) {	
+		
+		switch (item.getItemId()) {
+	    	case R.id.change_normal:    		
+	    		changeModeMap(1);
+	            return true;   
+	            
+	    	case R.id.change_satellite:
+	    		changeModeMap(2);
+	    		return true;	
+	    		
+	    	case R.id.change_terrain:
+	    		changeModeMap(3);
+	    		return true;
+	    		
+	    	case R.id.change_hybrid:
+	    		changeModeMap(4);
+	    		return true;
+	    }
+		return super.onOptionsItemSelected(item); 
 	}
 	
 	// crea los dialogos
@@ -154,22 +240,22 @@ public class MapActivity extends FragmentActivity {
 		dibujaEstacion();
 		
     }
-
+	
 	private void changeModeMap(int mode){
 		
 		switch(mode){
-			case 0:
-				mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-	            break;
 			case 1:
-				mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+				mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
 	            break;
 			case 2:
 				mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 	            break;
 			case 3:
 				mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
-	            break;		
+	            break;
+			case 4:
+				mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+	            break;					
 		}	
 	}
 	

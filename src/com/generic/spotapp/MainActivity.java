@@ -1,8 +1,6 @@
 package com.generic.spotapp;
 
 
-import com.google.android.gcm.GCMRegistrar;
-
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -31,15 +29,7 @@ public class MainActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		//check if GCM have dependencies installed
-		try{
-			GCMRegistrar.checkDevice(this);
-			
-		}catch(UnsupportedOperationException e)
-		{
-			Utils.showError("You don't have the proper dependencies installed. Please install google play.", this);
-			return;
-		}
+		
 		
 		// referencia a la coleccion de preferencias, para guardar preferencias en el dispositivo
 		SharedPreferences prefs = getSharedPreferences(getString(R.string.preference_file_key),Context.MODE_PRIVATE);
