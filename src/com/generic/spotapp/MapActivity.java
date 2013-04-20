@@ -412,10 +412,10 @@ public class MapActivity extends FragmentActivity {
 	
 	private void dibujaEstacion(){		
 		LatLng l1 = new LatLng(0,0);
-		LatLng l2 = new LatLng(45, 5);
-		LatLng l3 = new LatLng(86.64, 123.49);
+		LatLng l2 = new LatLng(45,5);
+		LatLng l3 = new LatLng(86.6469844869319,123.491223136456);
 		mMap.addPolyline((new PolylineOptions())
-               .add(l1, l2, l2)
+               .add(l1, l2, l3)
                 .width(5)
                 .color(Color.BLUE)
                 .geodesic(true));

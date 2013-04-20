@@ -14,5 +14,6 @@
     <string name="menu_change_hybrid">Modo hibrido</string>
     <string name="menu_change_satellite">Modo satelite</string>
     <string name="menu_change_terrain">Modo terreno</string>
+    <string name="main_prox_avistamientos">Proximos avistamientos</string>
 
 </resources>
