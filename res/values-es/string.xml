@@ -10,6 +10,9 @@
     <string name="title_activity_map">Mapa</string>   
     <string name="map_whale">Avistamiento</string> 
     <string name="mode_map">Cambiar modo</string>  
-    
+    <string name="menu_change_normal">Modo normal</string>
+    <string name="menu_change_hybrid">Modo hibrido</string>
+    <string name="menu_change_satellite">Modo satelite</string>
+    <string name="menu_change_terrain">Modo terreno</string>
 
 </resources>

@@ -3,10 +3,10 @@
         android:id="@+id/mode_map"
         android:title="@string/mode_map" android:orderInCategory="99">
         <menu>
-            <item android:id="@+id/change_normal" android:title="@string/menu_change_nornal" android:checkable="true" android:checked="true"/>
-            <item android:id="@+id/change_hybrid"/>
-            <item android:id="@+id/change_satelite"/>
-            <item android:id="@+id/change_terrain"/>
+            <item android:id="@+id/change_normal" android:title="@string/menu_change_normal" android:checkable="true"/>
+            <item android:id="@+id/change_hybrid" android:title="@string/menu_change_hybrid" android:checkable="true"/>
+            <item android:id="@+id/change_satellite" android:title="@string/menu_change_satellite" android:checkable="true"/>
+            <item android:id="@+id/change_terrain" android:title="@string/menu_change_terrain" android:checkable="true"/>
         </menu>
         
     </item>

@@ -11,5 +11,9 @@
     <string name="title_activity_map">Map</string>    
     <string name="map_whale">Whale</string>
     <string name="mode_map">Change mode</string>
+    <string name="menu_change_normal">Mode normal</string>
+    <string name="menu_change_hybrid">Mode hybrid</string>
+    <string name="menu_change_satelite">Mode satellite</string>
+    <string name="menu_change_terrain">Mode terrain</string>
 
 </resources>
