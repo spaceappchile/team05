@@ -3,6 +3,7 @@ package com.generic.spotapp;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -22,17 +23,21 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.CalendarContract.Events;
 import android.provider.Settings;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.database.Cursor;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -63,8 +68,6 @@ public class MainActivity extends Activity {
 		 * En este caso devuelve true
 		 * 		 	
 		 */		
-		
-		
 		
 		
 		
@@ -188,156 +191,67 @@ public class MainActivity extends Activity {
 	}
 	
 	
-	
-	
+
+
+private MyCalendar m_calendars[];
+
+private void getCalendars() {
+
+    String[] l_projection = new String[]{"_id", "displayName"};
+
+    Uri l_calendars;
+
+    if (Build.VERSION.SDK_INT >= 8 ) {
+
+        l_calendars = Uri.parse("content://com.android.calendar/calendars");
+
+    } else {
+
+        l_calendars = Uri.parse("content://calendar/calendars");
+
+    }
+
+    Cursor l_managedCursor = this.managedQuery(l_calendars, l_projection, null, null, null);    //all calendars
+
+    //Cursor l_managedCursor = this.managedQuery(l_calendars, l_projection, "selected=1", null, null);   //active calendars
+
+    if (l_managedCursor.moveToFirst()) {
+
+        m_calendars = new MyCalendar[l_managedCursor.getCount()];
+
+        String l_calName;
+
+        String l_calId;
+
+        int l_cnt = 0;
+
+        int l_nameCol = l_managedCursor.getColumnIndex(l_projection[1]);
+
+        int l_idCol = l_managedCursor.getColumnIndex(l_projection[0]);
+
+        do {
+
+            l_calName = l_managedCursor.getString(l_nameCol);
+
+            l_calId = l_managedCursor.getString(l_idCol);
+
+            m_calendars[l_cnt] = new MyCalendar(l_calName, l_calId);
+
+            ++l_cnt;
+
+        } while (l_managedCursor.moveToNext());
+
+    }
+
 }
-	class Proximos extends AsyncTask<String, Integer, Boolean>{
-		
-		private final String PASS_TIME_URL = "http://api.open-notify.org/iss/?n=%s&lat=%s&lon=%s";
-		ArrayList<Pass> pass;
-		
-		int n;
-		double lat, lng;
-		
-		String mensaje;
-		Context context;
-		
-		
-		Proximos(int n, double lat, double lng, Context context)
-		{
-			this.n = n;
-			this.lat = lat;
-			this.lng = lng;
-			this.context = context;
-		}
-
-		@Override
-		protected Boolean doInBackground(String... params) {
-			
-			Log.i("INFO", "Ejecutando task");
-		
-		
-			ArrayList<Pass> passArray = new ArrayList<Pass>();
-
-			
-			
-			
-			String formated = String.format(PASS_TIME_URL, Integer.toString(this.n), Double.toString(this.lat), Double.toString(this.lng));
-			
-			
-			Log.i("INFO", "Pre fetch");
-
-			//realizamos la peticion al servidor
-			HttpClient client = new DefaultHttpClient();
-			HttpGet request = new HttpGet();
-			
-			String responseStr = null;
-
-			try {
-				request.setURI(new URI(formated));
-				HttpResponse response = client.execute(request);
-				
-				Log.i("INFO", "post fetch");
-
-				HttpEntity entity = response.getEntity();
-				responseStr = EntityUtils.toString(entity);
-				
-			} catch (Exception e) {
-				
-				this.mensaje = "No se puede contactar con el servidor";
-				return false;
-			}
-
-			
-			try{
 
 
-			JSONObject json = new JSONObject(responseStr);
-
-			String message = json.getString("message");
-			if(message.equals(message))
-			{
-				JSONArray positions = json.getJSONArray("response");
-
-				Log.i("INFO", "parsing JSON");
-				
-				for(int i = 0; i < positions.length(); i++)
-				{
-					JSONObject pos = positions.getJSONObject(i);
-
-					int duration = Integer.parseInt(pos.getString("duration"));
-					long risetime = Long.parseLong(pos.getString("risetime"));
-
-					passArray.add(new Pass(duration, risetime));
-
-				}
-
-				Log.i("INFO", "fin parse json");
-				
-				this.pass =  passArray;
-
-				return true;
-
-			}
-			
-			}catch (Exception e){
-				this.mensaje = "Error al hacer el parse";
-				this.pass = null;
-				return false;
-			}
-			
-			return true;
-			
-		}
-
-	
-	    protected void onPostExecute(Boolean response) {
-	    	
-
-			Log.i("INFO", "POST EXECUTE PASS TIME");
 
 
-			
+}
 
-			if(response)
-			{
 
-				Log.i("INFO", "Tenemos todos los datos, YEAH!" + (Long.toString(this.pass.get(0).risetime)));
-				
-				
-				
-				for(int i = 0; i < this.pass.size(); i++)
-				{
-					
-					ContentValues event = new ContentValues();
-					event.put("title", "Next ISS pass");
-					event.put("description", "The ISS will pass over your position");
-					
-					long startTime = this.pass.get(i).risetime;
-					long endTime = this.pass.get(i).duration + startTime;
-					
-					event.put("dstart", startTime);
-					event.put("dend", endTime);
-					event.put("eventStatus", 1); // 1 => confirmed
-					
-					
-					event.put("hasAlarm", 1); // 0 for false, 1 for true
-					Uri eventsUri = Uri.parse("content://com.android.calendar/events");
-					Uri url = this.context.getContentResolver().insert(eventsUri, event);
-					
-					Log.i("INFO", url.toString());
-					
-				}
-			
 
-			}else{
-				Utils.showError(this.mensaje, this.context);
-			}
-		}
-
-		
-	}
-		
 		/**Pass class with the duration and risetime
 		 * */
 		class Pass{

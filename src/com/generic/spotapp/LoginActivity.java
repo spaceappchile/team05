@@ -6,28 +6,37 @@ package com.generic.spotapp;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.provider.CalendarContract.Events;
 import android.provider.Settings.Secure; //for the androidID unique identifier
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
 import android.location.Location;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +48,7 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.android.gcm.*;
@@ -588,7 +598,192 @@ public class LoginActivity extends Activity {
 		
 	}
 
+	class Proximos extends AsyncTask<String, Integer, Boolean>{
+		
+		private final String PASS_TIME_URL = "http://api.open-notify.org/iss/?n=%s&lat=%s&lon=%s";
+		ArrayList<Pass> pass;
+		
+		int n;
+		double lat, lng;
+		
+		String mensaje;
+		Context context;
+		
+		
+		Proximos(int n, double lat, double lng, Context context)
+		{
+			this.n = n;
+			this.lat = lat;
+			this.lng = lng;
+			this.context = context;
+		}
+
+		@Override
+		protected Boolean doInBackground(String... params) {
+			
+			Log.i("INFO", "Ejecutando task");
+		
+		
+			ArrayList<Pass> passArray = new ArrayList<Pass>();
+
+			
+			
+			
+			String formated = String.format(PASS_TIME_URL, Integer.toString(this.n), Double.toString(this.lat), Double.toString(this.lng));
+			
+			
+			Log.i("INFO", "Pre fetch");
+
+			//realizamos la peticion al servidor
+			HttpClient client = new DefaultHttpClient();
+			HttpGet request = new HttpGet();
+			
+			String responseStr = null;
+
+			try {
+				request.setURI(new URI(formated));
+				HttpResponse response = client.execute(request);
+				
+				Log.i("INFO", "post fetch");
+
+				HttpEntity entity = response.getEntity();
+				responseStr = EntityUtils.toString(entity);
+				
+			} catch (Exception e) {
+				
+				this.mensaje = "No se puede contactar con el servidor";
+				return false;
+			}
+
+			
+			try{
+
+
+			JSONObject json = new JSONObject(responseStr);
+
+			String message = json.getString("message");
+			if(message.equals(message))
+			{
+				JSONArray positions = json.getJSONArray("response");
+
+				Log.i("INFO", "parsing JSON");
+				
+				for(int i = 0; i < positions.length(); i++)
+				{
+					JSONObject pos = positions.getJSONObject(i);
+
+					int duration = Integer.parseInt(pos.getString("duration"));
+					long risetime = Long.parseLong(pos.getString("risetime"));
+
+					passArray.add(new Pass(duration, risetime));
+
+				}
+
+				Log.i("INFO", "fin parse json");
+				
+				this.pass =  passArray;
+
+				return true;
+
+			}
+			
+			}catch (Exception e){
+				this.mensaje = "Error al hacer el parse";
+				this.pass = null;
+				return false;
+			}
+			
+			return true;
+			
+		}
+
 	
+	    @SuppressLint("NewApi")
+		protected void onPostExecute(Boolean response) {
+	    	
+
+			Log.i("INFO", "POST EXECUTE PASS TIME");
+
+
+			
+
+			if(response)
+			{
+
+				Log.i("INFO", "Tenemos todos los datos, YEAH!" + (Long.toString(this.pass.get(0).risetime)));
+				
+				
+
+				int NewID = 0 + 1;
+				
+				
+				for(int i = 0; i < this.pass.size(); i++)
+				{
+	
+
+
+					   Intent l_intent = new Intent(Intent.ACTION_EDIT);
+
+					   l_intent.setType("vnd.android.cursor.item/event");
+
+					   //l_intent.putExtra("calendar_id", m_selectedCalendarId);  //this doesn't work
+
+					   l_intent.putExtra("title", "roman10 calendar tutorial test");
+
+					   l_intent.putExtra("description", "This is a simple test for calendar api");
+
+					   l_intent.putExtra("eventLocation", "@home");
+
+					   l_intent.putExtra("beginTime", System.currentTimeMillis());
+
+					   l_intent.putExtra("endTime", System.currentTimeMillis() + 1800*1000);
+
+					   l_intent.putExtra("allDay", 0);
+
+					   //status: 0~ tentative; 1~ confirmed; 2~ canceled
+
+					   l_intent.putExtra("eventStatus", 1);
+
+					   //0~ default; 1~ confidential; 2~ private; 3~ public
+
+					   l_intent.putExtra("visibility", 0);
+
+					   //0~ opaque, no timing conflict is allowed; 1~ transparency, allow overlap of scheduling
+
+					   l_intent.putExtra("transparency", 0);
+
+					   //0~ false; 1~ true
+
+					   l_intent.putExtra("hasAlarm", 1);
+
+					   try {
+
+					       startActivity(l_intent);
+
+					   } catch (Exception e) {
+
+					       Toast.makeText(context.getApplicationContext(), "Sorry, no compatible calendar is found!", Toast.LENGTH_LONG).show();
+
+					   }
+					
+					
+					
+					
+					
+				}
+			
+				Log.i("INFO", "terminado de poner los eventos");
+
+			}else{
+				Utils.showError(this.mensaje, this.context);
+			}
+		}
+
+	    
+	    
+		
+	}
+		
 	
 	
 }
