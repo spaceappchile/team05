@@ -14,5 +14,9 @@
     <string name="error_invalid_password">Esta contraseña es demasiado corta</string>
     <string name="error_incorrect_password">Esta contrseña es incorrecta</string>
     <string name="error_field_required">Este campo es requerido</string>
+    <string name="missing_name">Tienes que agregar un nombre de usuario</string>
+    <string name="error_conexion">A ocurrido un error en la conexion</string>
+    <string name="error_json">La respuesta del servidor no es un json valido</string>
+    <string name="error_parsing">Error de parseo</string>
 
 </resources>

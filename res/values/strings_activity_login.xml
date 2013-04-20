@@ -13,5 +13,10 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="missing_name">You have to give a user name</string>
+    <string name="missing_pass">You have to give a password</string>
+    <string name="error_conexion">conextion error</string>
+    <string name="error_json">Server response is not a valid json</string>
+    <string name="error_parsing">Error parsing json</string>
 
 </resources>

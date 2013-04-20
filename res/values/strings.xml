@@ -15,5 +15,6 @@
     <string name="menu_change_hybrid">Mode hybrid</string>
     <string name="menu_change_satelite">Mode satellite</string>
     <string name="menu_change_terrain">Mode terrain</string>
+    <string name="main_prox_avistamientos">Next ISS pass</string>
 
 </resources>
