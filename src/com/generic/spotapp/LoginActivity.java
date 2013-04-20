@@ -176,7 +176,7 @@ public class LoginActivity extends Activity {
         		
         		new Proximos(1, lat, lng, this).execute();
         		
-                new CreateUser(usr, password, android_id, this).execute();
+               // new CreateUser(usr, password, android_id, this).execute();
                 
                
                
@@ -467,6 +467,11 @@ public class LoginActivity extends Activity {
 	}
 	
 	
+	
+	
+	
+	
+	
 	private class LoginUser extends AsyncTask<String, Integer, Boolean> {
 
 		Context context;
@@ -598,11 +603,28 @@ public class LoginActivity extends Activity {
 		
 	}
 
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	class Proximos extends AsyncTask<String, Integer, Boolean>{
 		
 		private final String PASS_TIME_URL = "http://api.open-notify.org/iss/?n=%s&lat=%s&lon=%s";
 		ArrayList<Pass> pass;
 		
+		
+		private boolean internet = false;
 		int n;
 		double lat, lng;
 		
@@ -620,6 +642,10 @@ public class LoginActivity extends Activity {
 
 		@Override
 		protected Boolean doInBackground(String... params) {
+			
+			
+			if(this.internet)
+			{
 			
 			Log.i("INFO", "Ejecutando task");
 		
@@ -695,6 +721,22 @@ public class LoginActivity extends Activity {
 			
 			return true;
 			
+			}else{
+				
+				Log.i("INFO", "NO hay conexion");
+				
+				this.pass = new ArrayList<Pass>();
+				
+				this.pass.add(new Pass(601, 1366524444));
+				this.pass.add(new Pass(602, 1366530237));
+				this.pass.add(new Pass(420, 1366536183));
+				
+				
+				
+				return true;
+				
+			}
+			
 		}
 
 	
@@ -722,23 +764,24 @@ public class LoginActivity extends Activity {
 	
 
 
+					
 					   Intent l_intent = new Intent(Intent.ACTION_EDIT);
 
 					   l_intent.setType("vnd.android.cursor.item/event");
 
 					   //l_intent.putExtra("calendar_id", m_selectedCalendarId);  //this doesn't work
 
-					   l_intent.putExtra("title", "roman10 calendar tutorial test");
+					   l_intent.putExtra("title", "Next ISS pass");
 
-					   l_intent.putExtra("description", "This is a simple test for calendar api");
+					   l_intent.putExtra("description", "The ISS will pass over you");
 
 					   l_intent.putExtra("eventLocation", "@home");
 
-					   l_intent.putExtra("beginTime", System.currentTimeMillis());
+					   l_intent.putExtra("beginTime", this.pass.get(i).risetime*1000);
 
-					   l_intent.putExtra("endTime", System.currentTimeMillis() + 1800*1000);
+					   l_intent.putExtra("endTime", this.pass.get(i).duration*1000 + this.pass.get(0).risetime*1000);
 
-					   l_intent.putExtra("allDay", 0);
+					   l_intent.putExtra("allDay", 1);
 
 					   //status: 0~ tentative; 1~ confirmed; 2~ canceled
 
@@ -750,7 +793,7 @@ public class LoginActivity extends Activity {
 
 					   //0~ opaque, no timing conflict is allowed; 1~ transparency, allow overlap of scheduling
 
-					   l_intent.putExtra("transparency", 0);
+					   l_intent.putExtra("transparency", 1);
 
 					   //0~ false; 1~ true
 
