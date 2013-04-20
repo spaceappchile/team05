@@ -20,6 +20,7 @@ import com.google.android.gcm.GCMRegistrar;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -301,11 +302,30 @@ public class MainActivity extends Activity {
 			if(response)
 			{
 
-				Log.i("INFO", "Tenemos todos los datos, YEAH!");
+				Log.i("INFO", "Tenemos todos los datos, YEAH!" + (Long.toString(this.pass.get(0).risetime)));
+				
+				
 				
 				for(int i = 0; i < this.pass.size(); i++)
 				{
+					
 					ContentValues event = new ContentValues();
+					event.put("title", "Next ISS pass");
+					event.put("description", "The ISS will pass over your position");
+					
+					long startTime = this.pass.get(i).risetime;
+					long endTime = this.pass.get(i).duration + startTime;
+					
+					event.put("dstart", startTime);
+					event.put("dend", endTime);
+					event.put("eventStatus", 1); // 1 => confirmed
+					
+					
+					event.put("hasAlarm", 1); // 0 for false, 1 for true
+					Uri eventsUri = Uri.parse("content://com.android.calendar/events");
+					Uri url = this.context.getContentResolver().insert(eventsUri, event);
+					
+					Log.i("INFO", url.toString());
 					
 				}
 			
