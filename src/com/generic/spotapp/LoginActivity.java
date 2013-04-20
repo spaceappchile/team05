@@ -155,13 +155,15 @@ public class LoginActivity extends Activity {
 
                 if(usr.equals(""))
                 {
-                	mEmailView.setError("You have to give a user name");
+                	String error = getResources().getString(R.string.missing_name);
+                	mEmailView.setError(error);
                 	return;
                 }
                 
                 if(password.equals(""))
                 {
-                	mPasswordView.setError("You have to give a password");
+                	String error = getResources().getString(R.string.missing_name);
+                	mPasswordView.setError(error);
                 	return;
                 	
                 }
@@ -169,12 +171,9 @@ public class LoginActivity extends Activity {
                 //send a request to the database
                 
                 String android_id = Secure.getString(this.getContentResolver(), Secure.ANDROID_ID); 
-              
-                
-                double lat = -33.4496866030000035;
-        		double lng = -70.687233315499995;
+           
         		
-        		new Proximos(1, lat, lng, this).execute();
+        		
         		
                // new CreateUser(usr, password, android_id, this).execute();
                 
@@ -409,7 +408,8 @@ public class LoginActivity extends Activity {
 			//ocurrio un error :(
 			if(response == null)
 			{
-				Utils.showError("A ocurrido un error en la conexion", context);
+				String error = getResources().getString(R.string.error_conexion); 
+				Utils.showError(error, context);
 				return;
 			}
 
@@ -418,18 +418,20 @@ public class LoginActivity extends Activity {
 			try {
 				json = new JSONObject(response);
 			} catch (JSONException e) {
-				Utils.showError("Server response is not a valid json",
+				String error = getResources().getString(R.string.error_json);
+				Utils.showError(error,
 						this.context);
 				return;
 			}
 			
 			
-
+			String msgError = getResources().getString(R.string.error_parsing);
 			String responseStr;
 			try {
 				responseStr = json.getString("response");
 			} catch (JSONException e) {
-				Utils.showError("Error parsing json", this.context);
+
+				Utils.showError(msgError, this.context);
 				return;
 			}
 			
@@ -457,7 +459,8 @@ public class LoginActivity extends Activity {
 					}
 
 				} catch (JSONException e) {
-					Utils.showError("JSON parse error", this.context);
+
+					Utils.showError(msgError, this.context);
 					return;
 				}
 
@@ -478,8 +481,7 @@ public class LoginActivity extends Activity {
 		
 		private GoogleMap mMap;
 		
-		String mensaje;
-		
+		String mensaje;		
 		
 		//usuario/clave/android/gcm_id/lat/lng/
 		private static final String LOGIN_URL = "http://10.0.2.2:8000/login/%s/%s/%s/%s/%s/%s/";
@@ -529,10 +531,7 @@ public class LoginActivity extends Activity {
 			double lat = -33.4496866030000035;
 			double lng = -70.687233315499995;
 			
-			String formated = String.format(LOGIN_URL, this.usuario, this.clave, this.android, id, Double.toString(lat), Double.toString(lng));
-			
-			
-			
+			String formated = String.format(LOGIN_URL, this.usuario, this.clave, this.android, id, Double.toString(lat), Double.toString(lng));			
 			
 			//realizamos la peticion al servidor
 			HttpClient client = new DefaultHttpClient();
@@ -555,11 +554,6 @@ public class LoginActivity extends Activity {
 		
 		
 		protected void onPostExecute(Boolean response) {
-			
-			
-			
-			
-			
 			if(response)
 			{
 				
@@ -602,232 +596,5 @@ public class LoginActivity extends Activity {
 		}
 		
 	}
-
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	class Proximos extends AsyncTask<String, Integer, Boolean>{
-		
-		private final String PASS_TIME_URL = "http://api.open-notify.org/iss/?n=%s&lat=%s&lon=%s";
-		ArrayList<Pass> pass;
-		
-		
-		private boolean internet = false;
-		int n;
-		double lat, lng;
-		
-		String mensaje;
-		Context context;
-		
-		
-		Proximos(int n, double lat, double lng, Context context)
-		{
-			this.n = n;
-			this.lat = lat;
-			this.lng = lng;
-			this.context = context;
-		}
-
-		@Override
-		protected Boolean doInBackground(String... params) {
-			
-			
-			if(this.internet)
-			{
-			
-			Log.i("INFO", "Ejecutando task");
-		
-		
-			ArrayList<Pass> passArray = new ArrayList<Pass>();
-
-			
-			
-			
-			String formated = String.format(PASS_TIME_URL, Integer.toString(this.n), Double.toString(this.lat), Double.toString(this.lng));
-			
-			
-			Log.i("INFO", "Pre fetch");
-
-			//realizamos la peticion al servidor
-			HttpClient client = new DefaultHttpClient();
-			HttpGet request = new HttpGet();
-			
-			String responseStr = null;
-
-			try {
-				request.setURI(new URI(formated));
-				HttpResponse response = client.execute(request);
-				
-				Log.i("INFO", "post fetch");
-
-				HttpEntity entity = response.getEntity();
-				responseStr = EntityUtils.toString(entity);
-				
-			} catch (Exception e) {
-				
-				this.mensaje = "No se puede contactar con el servidor";
-				return false;
-			}
-
-			
-			try{
-
-
-			JSONObject json = new JSONObject(responseStr);
-
-			String message = json.getString("message");
-			if(message.equals(message))
-			{
-				JSONArray positions = json.getJSONArray("response");
-
-				Log.i("INFO", "parsing JSON");
-				
-				for(int i = 0; i < positions.length(); i++)
-				{
-					JSONObject pos = positions.getJSONObject(i);
-
-					int duration = Integer.parseInt(pos.getString("duration"));
-					long risetime = Long.parseLong(pos.getString("risetime"));
-
-					passArray.add(new Pass(duration, risetime));
-
-				}
-
-				Log.i("INFO", "fin parse json");
-				
-				this.pass =  passArray;
-
-				return true;
-
-			}
-			
-			}catch (Exception e){
-				this.mensaje = "Error al hacer el parse";
-				this.pass = null;
-				return false;
-			}
-			
-			return true;
-			
-			}else{
-				
-				Log.i("INFO", "NO hay conexion");
-				
-				this.pass = new ArrayList<Pass>();
-				
-				this.pass.add(new Pass(601, 1366524444));
-				this.pass.add(new Pass(602, 1366530237));
-				this.pass.add(new Pass(420, 1366536183));
-				
-				
-				
-				return true;
-				
-			}
-			
-		}
-
-	
-	    @SuppressLint("NewApi")
-		protected void onPostExecute(Boolean response) {
-	    	
-
-			Log.i("INFO", "POST EXECUTE PASS TIME");
-
-
-			
-
-			if(response)
-			{
-
-				Log.i("INFO", "Tenemos todos los datos, YEAH!" + (Long.toString(this.pass.get(0).risetime)));
-				
-				
-
-				int NewID = 0 + 1;
-				
-				
-				for(int i = 0; i < this.pass.size(); i++)
-				{
-	
-
-
-					
-					   Intent l_intent = new Intent(Intent.ACTION_EDIT);
-
-					   l_intent.setType("vnd.android.cursor.item/event");
-
-					   //l_intent.putExtra("calendar_id", m_selectedCalendarId);  //this doesn't work
-
-					   l_intent.putExtra("title", "Next ISS pass");
-
-					   l_intent.putExtra("description", "The ISS will pass over you");
-
-					   l_intent.putExtra("eventLocation", "@home");
-
-					   l_intent.putExtra("beginTime", this.pass.get(i).risetime*1000);
-
-					   l_intent.putExtra("endTime", this.pass.get(i).duration*1000 + this.pass.get(0).risetime*1000);
-
-					   l_intent.putExtra("allDay", 1);
-
-					   //status: 0~ tentative; 1~ confirmed; 2~ canceled
-
-					   l_intent.putExtra("eventStatus", 1);
-
-					   //0~ default; 1~ confidential; 2~ private; 3~ public
-
-					   l_intent.putExtra("visibility", 0);
-
-					   //0~ opaque, no timing conflict is allowed; 1~ transparency, allow overlap of scheduling
-
-					   l_intent.putExtra("transparency", 1);
-
-					   //0~ false; 1~ true
-
-					   l_intent.putExtra("hasAlarm", 1);
-
-					   try {
-
-					       startActivity(l_intent);
-
-					   } catch (Exception e) {
-
-					       Toast.makeText(context.getApplicationContext(), "Sorry, no compatible calendar is found!", Toast.LENGTH_LONG).show();
-
-					   }
-					
-					
-					
-					
-					
-				}
-			
-				Log.i("INFO", "terminado de poner los eventos");
-
-			}else{
-				Utils.showError(this.mensaje, this.context);
-			}
-		}
-
-	    
-	    
-		
-	}
-		
-	
-	
 }
 
