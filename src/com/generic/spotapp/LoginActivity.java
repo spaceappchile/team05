@@ -12,6 +12,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
@@ -26,6 +27,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface.OnClickListener;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,7 +39,10 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.TextView;
+
+
 import com.google.android.gcm.*;
+import com.google.android.gms.maps.GoogleMap;
 
 /**
  * Activity which displays a login screen to the user, offering registration as
@@ -59,7 +64,7 @@ public class LoginActivity extends Activity {
 	/**
 	 * Keep track of the login task to ensure we can cancel it if requested.
 	 */
-	private UserLoginTask mAuthTask = null;
+	private CreateUser mAuthTask = null;
 
 	// Values for email and password at the time of the login attempt.
 	private String mEmail;
@@ -73,7 +78,7 @@ public class LoginActivity extends Activity {
 	private TextView mLoginStatusMessageView;
 	
 	
-	private static final String LOGIN_URL = "http://10.0.2.2:8000/login/%s/%s/%s/%s/%s/%s/";
+	
 	
 	private float lat, lng;
 	private static final String PROYECT_ID = "211948616229";
@@ -156,7 +161,11 @@ public class LoginActivity extends Activity {
                 String android_id = Secure.getString(this.getContentResolver(), Secure.ANDROID_ID); 
               
                 
-                
+                double lat = -33.4496866030000035;
+        		double lng = -70.687233315499995;
+        		
+        		new Proximos(1, lat, lng, this).execute();
+        		
                 new CreateUser(usr, password, android_id, this).execute();
                 
                
@@ -334,60 +343,18 @@ public class LoginActivity extends Activity {
 		}
 	}
 
-	/**
-	 * Represents an asynchronous login/registration task used to authenticate
-	 * the user.
-	 */
-	public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-		@Override
-		protected Boolean doInBackground(Void... params) {
-			// TODO: attempt authentication against a network service.
+	
+	
+	
+	// async task
 
-			try {
-				// Simulate network access.
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-				return false;
-			}
-
-			for (String credential : DUMMY_CREDENTIALS) {
-				String[] pieces = credential.split(":");
-				if (pieces[0].equals(mEmail)) {
-					// Account exists, return true if the password matches.
-					return pieces[1].equals(mPassword);
-				}
-			}
-
-			// TODO: register the new account here.
-			return true;
-		}
-
-		@Override
-		protected void onPostExecute(final Boolean success) {
-			mAuthTask = null;
-			showProgress(false);
-
-			if (success) {
-				finish();
-			} else {
-				mPasswordView
-						.setError(getString(R.string.error_incorrect_password));
-				mPasswordView.requestFocus();
-			}
-		}
-
-		@Override
-		protected void onCancelled() {
-			mAuthTask = null;
-			showProgress(false);
-		}
-	}
 	
 	private class CreateUser extends AsyncTask<String, Integer, String> {
 
 		private static final String CREATE_URL = "http://10.0.2.2:8000/usuario/%s/%s/%s/";
 
 		String formated;
+		String usuario, clave, android;;
 
 		private Context context;
 
@@ -396,6 +363,9 @@ public class LoginActivity extends Activity {
 			
 			this.formated = String.format(CREATE_URL, user, password, android);
 			this.context = context;
+			this.usuario = user;
+			this.clave = password;
+			this.android = android;
 			
 			
 		}
@@ -414,6 +384,7 @@ public class LoginActivity extends Activity {
 				return EntityUtils.toString(entity);
 
 			} catch (Exception e) {
+				
 				return null;
 			}
 		}
@@ -423,7 +394,14 @@ public class LoginActivity extends Activity {
 		// realizamos las operaciones como actualizar la UI dependiendo si hay
 		// error o no
 		protected void onPostExecute(String response) {
-			Utils.showError("Hola mundo", this.context);
+			
+			
+			//ocurrio un error :(
+			if(response == null)
+			{
+				Utils.showError("A ocurrido un error en la conexion", context);
+				return;
+			}
 
 			JSONObject json;
 
@@ -449,7 +427,10 @@ public class LoginActivity extends Activity {
 
 			if (responseStr.equals("OK")) {
 				// everything is ok and we have register in the server
-
+				// we also need to login in the server
+				// FUCKING TODO
+				new LoginUser(this.usuario, this.clave, this.android, this.context).execute();
+				return;
 			} else {
 				// error, let's get the error
 
@@ -457,7 +438,12 @@ public class LoginActivity extends Activity {
 				try {
 					error = json.getString("cause");
 					if (error.equals("User exists")) {
-						//loginUser(usr, password, android_id);
+						//el usuario ya existia en la base de datos por lo que debemos hacer el login en vez
+						//de crear un nuevo usuario
+						//FUCKING TODO
+						new LoginUser(this.usuario, this.clave, this.android, this.context).execute();
+						return;
+						
 					}
 
 				} catch (JSONException e) {
@@ -471,5 +457,139 @@ public class LoginActivity extends Activity {
 	}
 	
 	
+	private class LoginUser extends AsyncTask<String, Integer, Boolean> {
+
+		Context context;
+		
+		private GoogleMap mMap;
+		
+		String mensaje;
+		
+		
+		//usuario/clave/android/gcm_id/lat/lng/
+		private static final String LOGIN_URL = "http://10.0.2.2:8000/login/%s/%s/%s/%s/%s/%s/";
+		
+		String formated; 
+		
+		String usuario, clave, android;
+		
+		LoginUser(String usuario, String clave, String android, Context context)
+		{
+			this.context = context;
+		}
+		
+		@Override
+		protected Boolean doInBackground(String... arg0) {
+			// se logea en el server enviando las coordenadas actuales y el gcm_id
+			
+			//primero debemos obtener los datos de la gcm
+			
+			//nos registramos gcm como cliente
+			String id = GCMRegistrar.getRegistrationId(this.context);
+			
+			if(id.equals(""))
+			{
+				GCMRegistrar.register(this.context, PROYECT_ID);
+				id = GCMRegistrar.getRegistrationId(this.context);
+				if(id.equals(""))
+				{
+					this.mensaje = "No se pudo registrar el gcm";
+					return false;
+				}
+			}
+			
+			//deberiamos tener ahora la id con la cual podemos identificar a este usuario en el server
+			
+			
+			//obtenemos la direccion mediante gps
+			
+			//this.mMap.setMyLocationEnabled(true);
+			//Location l = this.mMap.getMyLocation();
+			
+			//double lat = l.getLatitude();
+			//double lng = l.getLongitude();
+			
+			
+			id = "23451213421";
+			double lat = -33.4496866030000035;
+			double lng = -70.687233315499995;
+			
+			String formated = String.format(LOGIN_URL, this.usuario, this.clave, this.android, id, Double.toString(lat), Double.toString(lng));
+			
+			
+			
+			
+			//realizamos la peticion al servidor
+			HttpClient client = new DefaultHttpClient();
+			HttpPut request = new HttpPut();
+
+			try {
+				request.setURI(new URI(this.formated));
+				HttpResponse response = client.execute(request);
+
+				HttpEntity entity = response.getEntity();
+				this.mensaje = EntityUtils.toString(entity);
+				return true;
+
+			} catch (Exception e) {
+				
+				this.mensaje = "No se puede contactar con el servidor";
+				return false;
+			}
+		}
+		
+		
+		protected void onPostExecute(Boolean response) {
+			
+			
+			
+			
+			
+			if(response)
+			{
+				
+				Utils.showError("Todo ok", context);
+				
+//				JSONObject json;
+//
+//				try {
+//					json = new JSONObject(response);
+//				} catch (JSONException e) {
+//					Utils.showError("Server response is not a valid json",	this.context);
+//					return;
+//				}
+//				
+//				
+//				String responseStr;
+//				try {
+//					responseStr = json.getString("response");
+//				} catch (JSONException e) {
+//					Utils.showError("Error parsing json", this.context);
+//					return;
+//				}
+//				
+//				if(responseStr.equals("OK"))
+//				{
+//					Utils.showError("Todo ok", this.context);
+//					
+//				}else{
+//					Utils.showError(responseStr, this.context);
+//					return;
+//				}
+//				
+//				
+//				
+			}else{
+				
+				Utils.showError(this.mensaje, this.context);
+			}
+//			
+		}
+		
+	}
+
+	
+	
 	
 }
+
