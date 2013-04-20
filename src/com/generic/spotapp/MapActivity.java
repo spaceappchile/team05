@@ -8,6 +8,17 @@ package com.generic.spotapp;
 		
 
 
+import java.net.URI;
+
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -18,6 +29,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -29,6 +41,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
@@ -61,6 +74,9 @@ public class MapActivity extends FragmentActivity {
 		setContentView(R.layout.activity_map);	
 		
 		
+		
+		//buscamos la informacion sobre el clima
+		new Clima(0, 0).execute();
 		
 		gpsOn();
 		setUpMapIfNeeded();
@@ -396,13 +412,123 @@ public class MapActivity extends FragmentActivity {
 	
 	private void dibujaEstacion(){		
 		LatLng l1 = new LatLng(0,0);
-		LatLng l2 = new LatLng(45,5);
+		LatLng l2 = new LatLng(45, 5);
+		LatLng l3 = new LatLng(86.64, 123.49);
 		mMap.addPolyline((new PolylineOptions())
-               .add(l1, l2)
+               .add(l1, l2, l2)
                 .width(5)
                 .color(Color.BLUE)
                 .geodesic(true));
-	}	
+	}
+	
+	
+	
+	
+	class Clima extends AsyncTask<String, Integer, Boolean>{
+
+		double lat, lng;
+		
+		String mensaje;
+		
+		String clima, icon, descripcion;
+		
+		
+		boolean internet = false;
+		
+		private final static String URL_WEATHER = "http://api.openweathermap.org/data/2.1/find/city?lat=%s&lon=%s&cnt=1"; 
+		
+		Clima(double lat, double lng)
+		{
+			this.lat = lat;
+			this.lng = lng;
+			
+		}
+		
+		
+		@Override
+		protected Boolean doInBackground(String... params) {
+			
+			String formated = String.format(URL_WEATHER, this.lat, this.lng);
+			
+			String responseStr = null;
+
+			
+			if(this.internet)
+			{
+			
+
+				//realizamos la peticion al servidor
+				HttpClient client = new DefaultHttpClient();
+				HttpGet request = new HttpGet();
+
+
+
+
+				try {
+					request.setURI(new URI(formated));
+					HttpResponse response = client.execute(request);
+
+					Log.i("INFO", "post fetch wheather");
+
+					HttpEntity entity = response.getEntity();
+					responseStr = EntityUtils.toString(entity);
+
+				} catch (Exception e) {
+
+					this.mensaje = "No se puede contactar con el servidor del clima";
+					return false;
+				}
+
+
+				//parse json
+				try{
+					JSONObject json = new JSONObject(responseStr);
+					JSONArray list = json.getJSONArray("list");
+					JSONArray wheatherList = list.getJSONObject(0).getJSONArray("wheather");
+					
+					JSONObject wheather = list.getJSONObject(0);
+
+					this.clima = wheather.getString("main");
+					this.descripcion = wheather.getString("description");
+					this.icon = "i"+wheather.getString("icon");
+
+
+					return true;
+
+				}catch(Exception e){
+
+					return false;
+				}
+
+			
+			}else{
+				
+				this.clima = "Clear";
+				this.descripcion = "Sky is Clear";
+				this.icon = "i01d";
+				
+				
+				return true;
+			}
+		}
+		
+		
+		
+		@SuppressLint("NewApi")
+		protected void onPostExecute(Boolean response) {
+			
+			if(response)
+			{
+				//TODO! cargar el icono con el nombre this.icon, ese contiene el nombre del icono
+				
+			}else{
+				Log.i("INFO", "Error obteniendo el clima");
+			}
+		}
+		
+	}
+	
+	
 }
 	
 
