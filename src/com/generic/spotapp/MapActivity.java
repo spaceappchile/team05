@@ -653,7 +653,85 @@ public class MapActivity extends FragmentActivity {
 			}
 		}
 		
-	}	
+	}
+	
+	
+	
+	class GetOthers extends AsyncTask<String, Integer, Boolean>{
+
+		static final String OTHERS_URL = "http://spotissserver.alwaysdata.net/otros/";
+		
+		String responseStr;
+		
+		String mensaje;
+		
+		
+		@Override
+		protected Boolean doInBackground(String... params) {
+			//realizamos la peticion al servidor
+			HttpClient client = new DefaultHttpClient();
+			HttpGet request = new HttpGet();
+
+
+
+
+			try {
+				request.setURI(new URI(OTHERS_URL));
+				HttpResponse response = client.execute(request);
+
+				Log.i("OTHERS", "post fetchr");
+
+				HttpEntity entity = response.getEntity();
+				Log.i(INFO,"response = " + response);
+				Log.i(INFO,"enttity = " + entity);
+				this.responseStr = EntityUtils.toString(entity);
+				return true;
+			} catch (Exception e) {
+
+				this.mensaje = "No se puede contactar con el servidor del clima";
+				return false;
+			}
+
+		}
+		
+		protected void onPostExecute(Boolean response) {
+			if(response)
+			{
+				//parse
+				
+				try {
+					
+					JSONObject json = new JSONObject(this.responseStr);
+					
+					JSONArray array = json.getJSONArray("list");
+					
+					for(int i = 0; i < array.length(); i++)
+					{
+						double lat = array.getJSONObject(i).getDouble("lat");
+						double lng = array.getJSONObject(i).getDouble("lng");
+						
+						addmarker(lat, lng, "hola", "mundo");
+					}
+					
+					
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				
+			}else{
+				Log.i("OTHERS", this.mensaje);
+			}
+			
+		}
+		
+		
+		
+	}
+	
+	
+	
 }
 	
 
