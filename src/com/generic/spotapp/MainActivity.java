@@ -78,6 +78,10 @@ public class MainActivity extends Activity {
 	private ListView listView;
 	
     
+	double lat = -33.4496866030000035;
+	double lng = -70.687233315499995;
+	
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
@@ -90,8 +94,7 @@ public class MainActivity extends Activity {
 		
 		// DEBUG
 		
-		double lat = -33.4496866030000035;
-		double lng = -70.687233315499995;
+		
 									
 		//GCMRegistrar.checkDevice(this);
 		
@@ -269,6 +272,7 @@ public class MainActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
 				new facebook("I can see the International Space Station :)").execute();
+				new Report("androidID", lat, lng).execute();
 				//push notification to the server
 				
 				dialog.cancel();
