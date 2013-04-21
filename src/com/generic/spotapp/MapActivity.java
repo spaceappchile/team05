@@ -53,11 +53,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 
 public class MapActivity extends FragmentActivity {
 	
 	private static final String INFO = "INFO";
 	private static final int DIALOGO_CONFIRMACION = 0;
+	private ImageView imagen;
 	
 	private GoogleMap mMap;
 	private LocationListener listener;
@@ -74,7 +76,9 @@ public class MapActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_map);	
+		setContentView(R.layout.activity_map);
+		
+		imagen=(ImageView)findViewById(R.id.imagen_clima); 
 		
 		
 		
@@ -573,14 +577,11 @@ public class MapActivity extends FragmentActivity {
 
 					return false;
 				}
-
 			
-			}else{
-				
+			}else{				
 				this.clima = "Clear";
 				this.descripcion = "Sky is Clear";
-				this.icon = "i01d";
-				
+				this.icon = "i01d";			
 				
 				return true;
 			}
@@ -594,15 +595,42 @@ public class MapActivity extends FragmentActivity {
 			if(response)
 			{
 				//TODO! cargar el icono con el nombre this.icon, ese contiene el nombre del icono
+
+				
+				if(this.icon.equals("i01d")){
+					imagen.setImageResource(R.drawable.i01d);
+				}
+				else if(this.icon.equals("i02d")){
+					imagen.setImageResource(R.drawable.i02d);
+				}
+				else if(this.icon.equals("i03d")){
+					imagen.setImageResource(R.drawable.i03d);
+				}
+				else if(this.icon.equals("i04d")){
+					imagen.setImageResource(R.drawable.i04d);
+				}
+				else if(this.icon.equals("i05d")){
+					imagen.setImageResource(R.drawable.i09d);
+				}
+				else if(this.icon.equals("i06d")){
+					imagen.setImageResource(R.drawable.i10d);
+				}
+				else if(this.icon.equals("i06d")){
+					imagen.setImageResource(R.drawable.i11d);
+				}
+				else if(this.icon.equals("i06d")){
+					imagen.setImageResource(R.drawable.i13d);
+				}
+				else if(this.icon.equals("i06d")){
+					imagen.setImageResource(R.drawable.i50d);
+				}
 				
 			}else{
 				Log.i("INFO", "Error obteniendo el clima");
 			}
 		}
 		
-	}
-	
-	
+	}	
 }
 	
 
