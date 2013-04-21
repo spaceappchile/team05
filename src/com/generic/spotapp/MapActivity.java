@@ -94,6 +94,7 @@ public class MapActivity extends FragmentActivity {
 		//new Clima(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()).execute();
 		
 		//new Trayectoria().execute();
+		new GetOthers().execute();
 	}
 	
 	@Override
