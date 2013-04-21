@@ -17,6 +17,9 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
+
+
+//llamar con: new facebook("I can see now the ISS", this).execute();
 public class facebook extends AsyncTask<String, Integer, Boolean>{
 
 	static private final String FACEBOOK = "https://graph.facebook.com/me/feed?access_token=%s&message=%s";
@@ -29,12 +32,14 @@ public class facebook extends AsyncTask<String, Integer, Boolean>{
 	Context context;
 	
 	String mensaje;
+
+	String post;
 	
-	
-	facebook(Context context)
+	facebook(String post, Context context)
 	{
 		
 		this.context = context;
+		this.post = post;
 	}
 	
 	
@@ -46,7 +51,7 @@ public class facebook extends AsyncTask<String, Integer, Boolean>{
 		HttpPost request = new HttpPost();
 		
 		Log.i("INFO", "Posteando en FB");
-		String formated = String.format(FACEBOOK, ACCESS_TOKEN, URLEncoder.encode("Test desde android, ahora si con SpotIss"));
+		String formated = String.format(FACEBOOK, ACCESS_TOKEN, URLEncoder.encode(this.post));
 
 		try {
 			request.setURI(new URI(formated));
