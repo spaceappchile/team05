@@ -10,6 +10,7 @@ package com.generic.spotapp;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -30,6 +31,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import android.annotation.SuppressLint;
@@ -91,7 +93,7 @@ public class MapActivity extends FragmentActivity {
 		//buscamos la informacion sobre el clima
 		//new Clima(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()).execute();
 		
-		new Trayectoria().execute();
+		//new Trayectoria().execute();
 	}
 	
 	@Override
@@ -430,13 +432,15 @@ public class MapActivity extends FragmentActivity {
 	    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ojo)));		
 	}
 	
-	private void dibujaEstacion(ArrayList<LatLng> coors){		
+	private void dibujaEstacion(List<LatLng> coors){		
 		
-		mMap.addPolyline((new PolylineOptions())
-               .add((LatLng[]) coors.toArray())
+		Polyline line = mMap.addPolyline((new PolylineOptions())
                 .width(5)
                 .color(Color.BLUE)
                 .geodesic(true));
+		
+		line.setPoints(coors);
+		
 	}
 	
 	
@@ -450,6 +454,7 @@ public class MapActivity extends FragmentActivity {
 		@Override
 		protected Boolean doInBackground(String... params) {
 				
+			Log.i("ISS","info pre-fecth trayectoria");
 			HttpClient client = new DefaultHttpClient();
 			HttpGet request = new HttpGet();
 
@@ -461,17 +466,17 @@ public class MapActivity extends FragmentActivity {
 				this.respuesta = EntityUtils.toString(entity);
 
 			} catch (Exception e) {
-
-				return null;
+				Log.e("ISS", "error exception " + e );
+				return false;
 			}
 			
 				return true;
 		}
 		
 		
-		protected void onPostExecute(boolean response) {
+		protected void onPostExecute(Boolean response) {
 			
-			
+			Log.i("ISS", "algo");
 			
 			try {
 				
@@ -479,7 +484,7 @@ public class MapActivity extends FragmentActivity {
 				
 				JSONArray array = json.getJSONArray("lista");
 				
-				ArrayList<LatLng> coor = new ArrayList();
+				List<LatLng> coor = new ArrayList();
 				
 				for(int i = 0; i < array.length(); i++)
 				{
@@ -492,7 +497,9 @@ public class MapActivity extends FragmentActivity {
 					coor.add(new LatLng(lat, lng));
 				}
 				
-				
+				Log.i("ISS", "coor.size() = " + coor.size());
+				Log.i("ISS", "coor 0 lat" + coor.get(0).latitude);
+				Log.i("ISS", "coor 0 lng" + coor.get(0).longitude);
 				dibujaEstacion(coor);
 				
 				
@@ -537,6 +544,8 @@ public class MapActivity extends FragmentActivity {
 		@Override
 		protected Boolean doInBackground(String... params) {
 			
+			
+			Log.i(INFO, "prefecht clima");
 			String formated = String.format(URL_WEATHER, Double.toString(this.lat), Double.toString(this.lng));
 			
 			String responseStr = null;

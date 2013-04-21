@@ -16,5 +16,6 @@
     <string name="menu_change_terrain">Modo terreno</string>
     <string name="main_prox_avistamientos">Proximos avistamientos</string>
     <string name="txt_duracion">Duracion: </string>
+    <string name="action_report">Reportar</string>
 
 </resources>

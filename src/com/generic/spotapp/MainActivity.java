@@ -68,6 +68,7 @@ public class MainActivity extends Activity {
 	
 	private static final String INFO="I:MainActivity";
 	private static final int DIALOGO_CONFIRMACION = 0;
+	private static final int DIALOGO_REPORTE = 1;
 	// el tiempo en segundos
 	private ArrayList<Long> longs;
 	// la duracion en segundos
@@ -88,11 +89,13 @@ public class MainActivity extends Activity {
 		
 		
 		// DEBUG
+		
 		double lat = -33.4496866030000035;
-		double lng = -70.687233315499995;							
+		double lng = -70.687233315499995;
+									
 		//GCMRegistrar.checkDevice(this);
 		
-		new Proximos(1, lat, lng, this).execute();
+		new Proximos(10, lat, lng, this).execute();
 		
 		
 		listView = (ListView) findViewById(R.id.lista_avistamientos);
@@ -134,13 +137,17 @@ public class MainActivity extends Activity {
 			// abrimos el layout (pantalla) de bienvenida			
 			goWelcome();
 		}
-		
+		crearAdapter();
 	}
 	
 	private void crearAdapter(){
 		// adaptador personalizado :D
-		MiAdapter miAdapter = new MiAdapter(this, R.layout.single_view, cadenas);
-		listView.setAdapter(miAdapter);
+		try{
+			MiAdapter miAdapter = new MiAdapter(this, R.layout.single_view, cadenas);
+			listView.setAdapter(miAdapter);
+		}catch(Exception e){
+			Log.e("AD", "Exception - " + e);
+		}
 	}
     	
 	@Override
@@ -154,7 +161,14 @@ public class MainActivity extends Activity {
         switch (item.getItemId()) {
             case R.id.action_map:
             	goMaps();                	
-            	return true;               
+            	return true;
+            case R.id.action_report:
+            	showDialog(DIALOGO_REPORTE); 
+            	Log.i("info", "action_report");
+            	return true;
+            case R.id.action_settings:
+            	    	
+            	return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -167,7 +181,10 @@ public class MainActivity extends Activity {
 			case DIALOGO_CONFIRMACION:
 				dialogo = crearDialogoConfirmacion();
 			    break;
-			        
+			    
+			case DIALOGO_REPORTE:
+				dialogo = crearDialogoReporte();
+				break;
 			default:
 			    dialogo = null;
 			    break;
@@ -233,6 +250,29 @@ public class MainActivity extends Activity {
 			}
 		});
 		builder.setNegativeButton("Cancelar", new OnClickListener() {
+		    public void onClick(DialogInterface dialog, int which) {
+		        Log.i(INFO, "Confirmacion Cancelada.");
+		        dialog.cancel();
+		    }
+		});
+		 
+	    return builder.create();
+	}
+	
+	private Dialog crearDialogoReporte(){
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		 
+		builder.setTitle("Reporte");
+		builder.setMessage("¿Vez la estacion espacial?");
+		  
+		builder.setPositiveButton("Sí", new OnClickListener() {
+			public void onClick(DialogInterface dialog, int which) {
+				Log.i(INFO, "Confirmacion Aceptada.");
+				// TODO poner lo que se tiene que hacer al contesatar que si
+				dialog.cancel();
+			}
+		});
+		builder.setNegativeButton("No", new OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
 		        Log.i(INFO, "Confirmacion Cancelada.");
 		        dialog.cancel();
@@ -319,7 +359,7 @@ public class MainActivity extends Activity {
 		private final String PASS_TIME_URL = "http://api.open-notify.org/iss/?n=%s&lat=%s&lon=%s";
 		ArrayList<Pass> pass;
 				
-		private boolean internet = false;
+		private boolean internet = true;
 		int n;
 		double lat, lng;
 		
@@ -433,7 +473,7 @@ public class MainActivity extends Activity {
 				
 				int NewID = 0 + 1;
 								
-								
+				Log.i("PROX", "size pass" + pass.size());				
 				for(int i = 0; i < this.pass.size(); i++)
 				{
 					// para poder obtener la fecha en string

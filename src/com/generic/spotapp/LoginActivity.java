@@ -175,7 +175,7 @@ public class LoginActivity extends Activity {
         		
         		
         		
-               // new CreateUser(usr, password, android_id, this).execute();
+               new CreateUser(usr, password, android_id, this).execute();
                 
                
                
@@ -261,26 +261,26 @@ public class LoginActivity extends Activity {
 		
 		
 		//nos registramos gcm como cliente
-//		String id = GCMRegistrar.getRegistrationId(this);
-//		
-//		if(id.equals(""))
-//		{
-//			GCMRegistrar.register(this, PROYECT_ID);
-//			id = GCMRegistrar.getRegistrationId(this);
-//		}
-//		
-//		//estamos listos con el registro con el server de google
-//		
-//		String formated = String.format(LOGIN_URL, usuario, clave, android_id, id, Float.toString(this.lat), Float.toString(this.lng));
-//		
-//		RestClient rest = new RestClient(formated);
-//		
-//		String response;
-//	
-//		try {
-//			response = rest.performPut();
-//		} catch (ClientProtocolException e) {
-//			return;
+		String id = GCMRegistrar.getRegistrationId(this);
+		
+		if(id.equals(""))
+		{
+		GCMRegistrar.register(this, PROYECT_ID);
+			id = GCMRegistrar.getRegistrationId(this);
+		}
+		Log.i("LOGIN", "id: " + id);
+		//estamos listos con el registro con el server de google
+/*		
+		String formated = String.format(LOGIN_URL, usuario, clave, android_id, id, Float.toString(this.lat), Float.toString(this.lng));
+		
+		RestClient rest = new RestClient(formated);
+		
+		String response;
+	
+		try {
+			response = rest.performPut();
+		} catch (ClientProtocolException e) {
+			return; */
 //		} catch (URISyntaxException e) {
 //			return;
 //		} catch (IOException e) {

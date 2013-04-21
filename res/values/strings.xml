@@ -17,5 +17,6 @@
     <string name="menu_change_terrain">Mode terrain</string>
     <string name="main_prox_avistamientos">Next ISS pass</string>
     <string name="txt_duracion">Duration: </string>
+    <string name="action_report">Report</string>
 
 </resources>
