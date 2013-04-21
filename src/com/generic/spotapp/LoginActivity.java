@@ -248,65 +248,16 @@ public class LoginActivity extends Activity {
 	}
 	
 	
-	private void loginUser(String usuario, String clave, String android_id)
-	{
-	   // Registrarse contra los servidores de GCM como cliente capaz de recibir mensajes.
-	   // Almacenar el “Registration ID” recibido como resultado del registro anterior.
-	   // Comunicar a la aplicación web el “Registration ID” de forma que ésta pueda enviarle mensajes.
-	   // Recibir y procesar los mensajes desde el servidor de GCM.
+	class Login extends AsyncTask<String, Integer, Boolean>{
 
 		
-		//revisamos si tenemos las dependencias instaladas
 		
 		
-		
-		//nos registramos gcm como cliente
-		String id = GCMRegistrar.getRegistrationId(this);
-		
-		if(id.equals(""))
-		{
-		GCMRegistrar.register(this, PROYECT_ID);
-			id = GCMRegistrar.getRegistrationId(this);
+		@Override
+		protected Boolean doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			return null;
 		}
-		Log.i("LOGIN", "id: " + id);
-		//estamos listos con el registro con el server de google
-/*		
-		String formated = String.format(LOGIN_URL, usuario, clave, android_id, id, Float.toString(this.lat), Float.toString(this.lng));
-		
-		RestClient rest = new RestClient(formated);
-		
-		String response;
-	
-		try {
-			response = rest.performPut();
-		} catch (ClientProtocolException e) {
-			return; */
-//		} catch (URISyntaxException e) {
-//			return;
-//		} catch (IOException e) {
-//			return;
-//		} catch (Error404 e) {
-//			return;
-//		}
-//		
-//		
-//		JSONObject json;
-//		
-//		try {
-//			json = new JSONObject(response);
-//			String error = json.getString("response");
-//			if(error.equals("ERROR"))
-//			{
-//				return;
-//			}else{
-//				//OK
-//				Utils.showError("Ok", this);
-//			}
-//		} catch (JSONException e) {
-//			return;
-//		}
-//		
-//		
 		
 	}
 	
