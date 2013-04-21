@@ -268,7 +268,9 @@ public class MainActivity extends Activity {
 		builder.setPositiveButton("Sí", new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
-				// TODO poner lo que se tiene que hacer al contesatar que si
+				new facebook("I can see the International Space Station :)").execute();
+				//push notification to the server
+				
 				dialog.cancel();
 			}
 		});
@@ -392,7 +394,7 @@ public class MainActivity extends Activity {
 	
 				//realizamos la peticion al servidor
 				HttpClient client = new DefaultHttpClient();
-				HttpGet request = new HttpGet();
+				HttpPut request = new HttpPut();
 				
 				String responseStr = null;
 	
@@ -495,7 +497,56 @@ public class MainActivity extends Activity {
 				Utils.showError(this.mensaje, this.context);
 			}
 		}	
-	}		
+	}
+	
+	
+	
+	class Report extends AsyncTask<String, Integer, Boolean>{
+
+		
+		
+		private final String URL_REPORT = "http://spotissserver.alwaysdata.net/nofify/%s/%s/%s/";
+		
+		
+		String formated;
+		String mensaje;
+		
+		
+		Report(String android, double lat, double lng)
+		{
+			String formated = String.format(URL_REPORT, android, Double.toString(lat), Double.toString(lng));
+		}
+		
+		
+		@Override
+		protected Boolean doInBackground(String... params) {
+			HttpClient client = new DefaultHttpClient();
+			HttpPut request = new HttpPut();
+			
+			String responseStr = null;
+
+			try {
+				request.setURI(new URI(this.formated));
+				HttpResponse response = client.execute(request);
+				
+				Log.i("REPORT", "post fetch");
+
+				HttpEntity entity = response.getEntity();
+				responseStr = EntityUtils.toString(entity);
+				
+			} catch (Exception e) {
+				
+				this.mensaje = "No se puede contactar con el servidor";
+				return false;
+			}
+			return true;
+		}
+		
+		
+		
+	}
+	
+	
 }
 
 
