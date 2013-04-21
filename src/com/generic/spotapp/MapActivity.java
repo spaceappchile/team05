@@ -532,7 +532,7 @@ public class MapActivity extends FragmentActivity {
 		
 		boolean internet = true;
 		
-		private final static String URL_WEATHER = "http://api.openweathermap.org/data/2.1/find/city?lat=%s&lon=%s&cnt=1"; 
+		private final static String URL_WEATHER = "http://api.openweathermap.org/data/2.1/find/city?lat=%s&lon=%s&cnt=1&APPID=6ac9778157d222a99cba080476645453"; 
 		
 		Clima(double lat, double lng)
 		{
@@ -548,6 +548,7 @@ public class MapActivity extends FragmentActivity {
 			
 			Log.i(INFO, "prefecht clima");
 			String formated = String.format(URL_WEATHER, Double.toString(this.lat), Double.toString(this.lng));
+			Log.i(INFO, "formated: " + formated);
 			
 			String responseStr = null;
 
@@ -572,10 +573,10 @@ public class MapActivity extends FragmentActivity {
 					HttpEntity entity = response.getEntity();
 					Log.i(INFO,"response = " + response);
 					Log.i(INFO,"enttity = " + entity);
-					responseStr = EntityUtils.toString(entity);
+					responseStr = EntityUtils.toString(entity);					
 
 				} catch (Exception e) {
-
+					Log.e("CLIMA", "exception " + e);
 					this.mensaje = "No se puede contactar con el servidor del clima";
 					return false;
 				}
@@ -586,6 +587,10 @@ public class MapActivity extends FragmentActivity {
 					Log.i(INFO, "ResponseStr: "+ responseStr);
 					JSONObject json = new JSONObject(responseStr);
 					
+					String message = json.getString("message");
+					Log.i("CLIMA", "message " + message);
+					
+					Log.i(INFO,"indicador");
 					JSONArray list = json.getJSONArray("list");
 					JSONArray wheatherList = list.getJSONObject(0).getJSONArray("wheather");
 					
