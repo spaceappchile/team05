@@ -537,7 +537,7 @@ public class MapActivity extends FragmentActivity {
 		@Override
 		protected Boolean doInBackground(String... params) {
 			
-			String formated = String.format(URL_WEATHER, this.lat, this.lng);
+			String formated = String.format(URL_WEATHER, Double.toString(this.lat), Double.toString(this.lng));
 			
 			String responseStr = null;
 
