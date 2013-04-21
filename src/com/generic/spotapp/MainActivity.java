@@ -94,7 +94,6 @@ public class MainActivity extends Activity {
 		
 		// DEBUG
 		
-		
 									
 		//GCMRegistrar.checkDevice(this);
 		
@@ -509,7 +508,7 @@ public class MainActivity extends Activity {
 
 		
 		
-		private final String URL_REPORT = "http://spotissserver.alwaysdata.net/nofify/%s/%s/%s/";
+		private final static String URL_REPORT = "http://spotissserver.alwaysdata.net/notify/%s/%s/%s/";
 		
 		
 		String formated;
@@ -518,14 +517,20 @@ public class MainActivity extends Activity {
 		
 		Report(String android, double lat, double lng)
 		{
-			String formated = String.format(URL_REPORT, android, Double.toString(lat), Double.toString(lng));
+			
+			this.formated = String.format(URL_REPORT, android, Double.toString(lat), Double.toString(lng));
 		}
 		
 		
 		@Override
 		protected Boolean doInBackground(String... params) {
+			
+			
+			Log.i("REPORT", "Enviando reporte al servidor");
 			HttpClient client = new DefaultHttpClient();
 			HttpPut request = new HttpPut();
+			
+			
 			
 			String responseStr = null;
 
@@ -538,9 +543,12 @@ public class MainActivity extends Activity {
 				HttpEntity entity = response.getEntity();
 				responseStr = EntityUtils.toString(entity);
 				
+				Log.i("REPORT", responseStr);
+				
 			} catch (Exception e) {
 				
-				this.mensaje = "No se puede contactar con el servidor";
+				Log.i("REPORT", "No se puede enviar el reporte al servidor");
+				
 				return false;
 			}
 			return true;
