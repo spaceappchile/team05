@@ -79,13 +79,14 @@ public class MapActivity extends FragmentActivity {
 		
 		
 		
-		//buscamos la informacion sobre el clima
-		new Clima(0, 0).execute();
+		
 		
 		gpsOn();
 		setUpMapIfNeeded();
 		
 		modeNormal=(MenuItem) findViewById(R.id.change_normal);
+		//buscamos la informacion sobre el clima
+		//new Clima(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()).execute();
 	}
 	
 	@Override
@@ -123,17 +124,20 @@ public class MapActivity extends FragmentActivity {
         switch(mode){
        		case 1:
        			modeNormal = menu.findItem(R.id.change_normal);
-       			modeNormal.isChecked();
+       			modeNormal.setChecked(true);
        			Log.i(INFO,"is checked");
        			break;
 			case 2:
-				
+				modeSatellite = menu.findItem(R.id.change_satellite);
+				modeSatellite.setChecked(true);
 	            break;
 			case 3:
-				
+				modeTerrain = menu.findItem(R.id.change_terrain);
+				modeTerrain.setChecked(true);				
 	            break;
 			case 4:
-				
+				modeHybrid = menu.findItem(R.id.change_hybrid);
+				modeHybrid.setChecked(true);				
 	            break;	        
         }               
         
@@ -144,7 +148,7 @@ public class MapActivity extends FragmentActivity {
 		 
 		 switch (item.getItemId()) {
 	    	case R.id.change_normal:    		
-	    		modeNormal = (MenuItem) findViewById(R.id.change_normal);
+	    		changeModeMap(1);
 	            return true;   
 	            
 	    	case R.id.change_satellite:
@@ -163,6 +167,7 @@ public class MapActivity extends FragmentActivity {
 		 return true;		 
 	 }
 	
+	 // esto no
 	// metodo que observa las pulsaciones del menu opciones
 	public boolean onOptionsItemSelected(MenuItem item) {	
 		
@@ -258,6 +263,13 @@ public class MapActivity extends FragmentActivity {
 		
 		addmarkers();
 		dibujaEstacion();
+	
+		//buscamos la informacion sobre el clima
+		if(mMap.getMyLocation()!=null){
+			
+			//new Clima(loc.getLatitude(), loc.getLongitude()).execute();
+		}
+		new Clima(-33.44989201,-70.68687829).execute();
 		
     }
 	
@@ -437,7 +449,7 @@ public class MapActivity extends FragmentActivity {
 		String clima, icon, descripcion;
 		
 		
-		boolean internet = false;
+		boolean internet = true;
 		
 		private final static String URL_WEATHER = "http://api.openweathermap.org/data/2.1/find/city?lat=%s&lon=%s&cnt=1"; 
 		
@@ -475,6 +487,8 @@ public class MapActivity extends FragmentActivity {
 					Log.i("INFO", "post fetch wheather");
 
 					HttpEntity entity = response.getEntity();
+					Log.i(INFO,"response = " + response);
+					Log.i(INFO,"enttity = " + entity);
 					responseStr = EntityUtils.toString(entity);
 
 				} catch (Exception e) {
@@ -486,7 +500,9 @@ public class MapActivity extends FragmentActivity {
 
 				//parse json
 				try{
+					Log.i(INFO, "ResponseStr: "+ responseStr);
 					JSONObject json = new JSONObject(responseStr);
+					
 					JSONArray list = json.getJSONArray("list");
 					JSONArray wheatherList = list.getJSONObject(0).getJSONArray("wheather");
 					
@@ -501,6 +517,7 @@ public class MapActivity extends FragmentActivity {
 
 				}catch(Exception e){
 
+					Log.i(INFO,"Exception: "+e);
 					return false;
 				}
 			
@@ -520,8 +537,6 @@ public class MapActivity extends FragmentActivity {
 			
 			if(response)
 			{
-				//TODO! cargar el icono con el nombre this.icon, ese contiene el nombre del icono
-
 				
 				if(this.icon.equals("i01d")){
 					imagen.setImageResource(R.drawable.i01d);
