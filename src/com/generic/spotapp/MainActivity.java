@@ -122,7 +122,7 @@ public class MainActivity extends Activity {
 		 */
 		
 		// DEBUG
-		prefs.edit().clear().commit();
+		//prefs.edit().clear().commit();
 		boolean firstTime = prefs.getBoolean("firstTime", true);
 		
 		
