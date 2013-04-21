@@ -398,7 +398,7 @@ public class MainActivity extends Activity {
 	
 				//realizamos la peticion al servidor
 				HttpClient client = new DefaultHttpClient();
-				HttpPut request = new HttpPut();
+				HttpGet request = new HttpGet();
 				
 				String responseStr = null;
 	
