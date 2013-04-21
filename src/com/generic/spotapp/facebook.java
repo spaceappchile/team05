@@ -24,7 +24,7 @@ public class facebook extends AsyncTask<String, Integer, Boolean>{
 
 	static private final String FACEBOOK = "https://graph.facebook.com/me/feed?access_token=%s&message=%s";
 	
-	static private final String ACCESS_TOKEN = "BAAHbYnoO8akBAIZBCuNCFPk0Q13nDxkyCWqdNhaxgZCEMyD6h48YBO6nqMqqZCdUKcZCOgOhoyASYHb4ANmrZCZC4XhyVSEvpGFzZCya7jrFqbYJEDRKQwBNkZCpQM0vMU2Kaen5ZAE1fEHRsdhD3ZBvE9HqVEDWlKoVA3vkZBfpORu9pSZCeGI7x03MSxdAeoZBZCRBZA4MZCBhXB7utwZDZD";
+	static private final String ACCESS_TOKEN = "BAAHbYnoO8akBAGASFw1fIQq1nJ54etZCjBTGR2zAF74f8rZCmBAW3BHFPXXH4vIcKGCtVolOZBZA5zZBXxoXkYLtcHAohs1qoLDov5eu4ESC2Euuya4Mjh7oSK8UHCe0r4X1LeSxm264XZADVzWjnPylH0tqYg6C5EuzH7NTCjCfW3GaUQpEhlZBLe3bl2JqLxwlEvBDN4WBjGwn5b2QaZB0";
 	
 	
 	
