@@ -9,14 +9,17 @@ package com.generic.spotapp;
 
 
 import java.net.URI;
+import java.util.ArrayList;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -82,6 +85,8 @@ public class MapActivity extends FragmentActivity {
 		setUpMapIfNeeded();
 		
 		modeNormal=(MenuItem) findViewById(R.id.change_normal);
+		
+		new Trayectoria().execute();
 	}
 	
 	@Override
@@ -253,7 +258,7 @@ public class MapActivity extends FragmentActivity {
 			Log.i(INFO,"Mylocation is null");
 		
 		addmarkers();
-		dibujaEstacion();
+		
 		
     }
 	
@@ -410,16 +415,85 @@ public class MapActivity extends FragmentActivity {
 	    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ojo)));		
 	}
 	
-	private void dibujaEstacion(){		
-		LatLng l1 = new LatLng(0,0);
-		LatLng l2 = new LatLng(45,5);
-		LatLng l3 = new LatLng(86.6469844869319,123.491223136456);
+	private void dibujaEstacion(ArrayList<LatLng> coors){		
+		
 		mMap.addPolyline((new PolylineOptions())
-               .add(l1, l2, l3)
+               .add((LatLng[]) coors.toArray())
                 .width(5)
                 .color(Color.BLUE)
                 .geodesic(true));
 	}
+	
+	
+	
+	class Trayectoria extends AsyncTask<String, Integer, Boolean>{
+		
+		final static String DATA_SERVER_URL = "http://spotissserver.alwaysdata.net/data/";
+
+		String respuesta;
+		
+		@Override
+		protected Boolean doInBackground(String... params) {
+				
+			HttpClient client = new DefaultHttpClient();
+			HttpGet request = new HttpGet();
+
+			try {
+				request.setURI(new URI(DATA_SERVER_URL));
+				HttpResponse response = client.execute(request);
+
+				HttpEntity entity = response.getEntity();
+				this.respuesta = EntityUtils.toString(entity);
+
+			} catch (Exception e) {
+
+				return null;
+			}
+			
+				return true;
+		}
+		
+		
+		protected void onPostExecute(boolean response) {
+			
+			
+			
+			try {
+				
+				JSONObject json = new JSONObject(this.respuesta);
+				
+				JSONArray array = json.getJSONArray("lista");
+				
+				ArrayList<LatLng> coor = new ArrayList();
+				
+				for(int i = 0; i < array.length(); i++)
+				{
+					JSONObject datos = array.getJSONObject(i);
+					
+					double lat = Double.parseDouble(datos.getString("lat"));
+					double lng = Double.parseDouble(datos.getString("lng"));
+					
+					
+					coor.add(new LatLng(lat, lng));
+				}
+				
+				
+				dibujaEstacion(coor);
+				
+				
+				
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+		}
+		
+		
+		
+	}
+	
 	
 	
 	
