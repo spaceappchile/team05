@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import com.google.android.gcm.GCMRegistrar;
 
 
+
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationManager;
@@ -46,9 +47,11 @@ import android.content.DialogInterface.OnClickListener;
 import android.database.Cursor;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ExpandableListView;
@@ -65,51 +68,43 @@ public class MainActivity extends Activity {
 	
 	private static final String INFO="I:MainActivity";
 	private static final int DIALOGO_CONFIRMACION = 0;
+	// el tiempo en segundos
 	private ArrayList<Long> longs;
+	// la duracion en segundos
 	private ArrayList<Integer> duracion;
-	private ArrayList<String> cadenas = new ArrayList();
-	
+	// string con la fecha, en ingles
+	private ArrayList<String> cadenas;	
 	private ListView listView;
-		
-	// This is the Adapter being used to display the list's data
-   
-
-    // These are the Contacts rows that we will retrieve
-
+	
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		duracion = new ArrayList();
-		longs = new ArrayList();
+		duracion = new ArrayList<Integer>();
+		longs = new ArrayList<Long>();
+		cadenas = new ArrayList<String>();
 		
+		
+		// DEBUG
 		double lat = -33.4496866030000035;
-		double lng = -70.687233315499995;
-							
+		double lng = -70.687233315499995;							
 		//GCMRegistrar.checkDevice(this);
 		
 		new Proximos(1, lat, lng, this).execute();
 		
 		
-		// This is the select criteria
 		listView = (ListView) findViewById(R.id.lista_avistamientos);
 		registerForContextMenu(listView);
-				
 		
-		if(longs.size()==0)
-			Log.i(INFO,"AWEONAO, como te pasa esta wea imbecil!!!");
-		if(duracion.size()==0)
-			Log.i(INFO,"AWEONAO de la 2° forma, como te pasa esta wea imbecil!!!");
-		
+		// escucha toques en los elementos de la lista
 		listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 		      @Override
 		      public void onItemClick(AdapterView<?> parent, final View view, int position, long id){
 		    	  nuevoEventoCalendario(duracion.get(position), longs.get(position), view.getContext());		    	  
 		      }
-		});
-
-		
+		});	
 		
 		// referencia a la coleccion de preferencias, para guardar preferencias en el dispositivo
 		SharedPreferences prefs = getSharedPreferences(getString(R.string.preference_file_key),Context.MODE_PRIVATE);
@@ -119,10 +114,14 @@ public class MainActivity extends Activity {
 		 * valor de defecto que en este caso esta dado por el segundo
 		 * parametro de la funcion.
 		 * En este caso devuelve true		 	
-		 */		
+		 */
+		
+		// DEBUG
 		prefs.edit().clear().commit();
 		boolean firstTime = prefs.getBoolean("firstTime", true);
 		
+		
+		// muestra pantallan de bienvenida
 		if(firstTime){			
 			Log.i(INFO,"primera vez");
 			
@@ -132,31 +131,20 @@ public class MainActivity extends Activity {
 			editor.putBoolean("firstTime", false);
 			// para aplicar cambios
 			editor.commit();
-			// abrimos el layout (pantalla) de bienvenida 
-			
+			// abrimos el layout (pantalla) de bienvenida			
 			goWelcome();
 		}
 		
 	}
 	
 	private void crearAdapter(){
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, 
-		        android.R.layout.simple_list_item_1, cadenas);
-		
-		listView.setAdapter(adapter);
+		// adaptador personalizado :D
+		MiAdapter miAdapter = new MiAdapter(this, R.layout.single_view, cadenas);
+		listView.setAdapter(miAdapter);
 	}
-        
-	// se ejecuta cuando se hace un click sobre un elemento de 
-	// la lista
-    /*
-	@Override	
-    public void onListItemClick(ListView l, View v, int position, long id) {
-    
-    }*/
-	
+    	
 	@Override
-	public boolean onCreateOptionsMenu(Menu menu) {
-		
+	public boolean onCreateOptionsMenu(Menu menu) {		
 		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
@@ -180,7 +168,6 @@ public class MainActivity extends Activity {
 				dialogo = crearDialogoConfirmacion();
 			    break;
 			        
-			    //...	
 			default:
 			    dialogo = null;
 			    break;
@@ -299,6 +286,33 @@ public class MainActivity extends Activity {
 		   }	
 	}
 	
+	public class MiAdapter extends ArrayAdapter<String>{
+		private Context ctx;
+		private ArrayList<String> dates;
+		
+		public MiAdapter(Context ctx, int textVievResourcedId, ArrayList<String> obj){
+			super(ctx, textVievResourcedId, obj);
+			this.ctx = ctx;
+			this.dates = obj;
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent){
+			
+			if(convertView==null){
+				LayoutInflater infalInflater = (LayoutInflater) ctx.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				convertView = infalInflater.inflate(R.layout.single_view, null);
+			}
+			TextView fecha = (TextView)convertView.findViewById(R.id.single_date);
+			TextView duration = (TextView)convertView.findViewById(R.id.single_duration);
+		
+			fecha.setText(dates.get(position));
+			String sDuracion = getResources().getString(R.string.txt_duracion);
+			duration.setText(sDuracion+duracion.get(position)/60 + "min" );
+			
+			return convertView;			
+		}		
+	}
 
 	private class Proximos extends AsyncTask<String, Integer, Boolean>{
 		
@@ -422,10 +436,14 @@ public class MainActivity extends Activity {
 								
 				for(int i = 0; i < this.pass.size(); i++)
 				{
+					// para poder obtener la fecha en string
 					Date fecha = new Date(pass.get(i).risetime*1000);
-					long j=pass.get(i).risetime;
-					longs.add(j);
+					
+					// se agregan el tiempo en segundos
+					longs.add(pass.get(i).risetime*1000);
+					// se agregan la duracion en segundos
 					duracion.add(pass.get(i).duration);
+					// se agrega la fecha en string
 					cadenas.add(fecha.toString());
 				}
 				
