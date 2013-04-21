@@ -588,18 +588,24 @@ public class MapActivity extends FragmentActivity {
 					JSONObject json = new JSONObject(responseStr);
 					
 					String message = json.getString("message");
-					Log.i("CLIMA", "message " + message);
+					JSONArray list = json.getJSONArray("list");
 					
-					Log.i(INFO,"indicador");
+					//Log.i("clima", "main: "+main);
+					JSONObject elemList = list.getJSONObject(0);
+					JSONArray listWeather = elemList.getJSONArray("weather");
+					JSONObject weather = listWeather.getJSONObject(0);
+					
+										
+					/*
 					JSONArray list = json.getJSONArray("list");
 					JSONArray wheatherList = list.getJSONObject(0).getJSONArray("wheather");
 					
-					JSONObject wheather = list.getJSONObject(0);
-
-					this.clima = wheather.getString("main");
-					this.descripcion = wheather.getString("description");
-					this.icon = "i"+wheather.getString("icon");
-
+					JSONObject wheather = list.getJSONObject(0);*/
+					
+					this.clima = weather.getString("main");
+					this.descripcion = weather.getString("description");
+					this.icon = "i"+weather.getString("icon");
+					Log.i("clima", "clima: "+ this.icon);
 
 					return true;
 
@@ -624,8 +630,7 @@ public class MapActivity extends FragmentActivity {
 		protected void onPostExecute(Boolean response) {
 			
 			if(response)
-			{
-				
+			{				
 				if(this.icon.equals("i01d")){
 					imagen.setImageResource(R.drawable.i01d);
 				}
@@ -641,18 +646,20 @@ public class MapActivity extends FragmentActivity {
 				else if(this.icon.equals("i05d")){
 					imagen.setImageResource(R.drawable.i09d);
 				}
-				else if(this.icon.equals("i06d")){
+				else if(this.icon.equals("i10d")){
 					imagen.setImageResource(R.drawable.i10d);
 				}
-				else if(this.icon.equals("i06d")){
+				else if(this.icon.equals("i11d")){
 					imagen.setImageResource(R.drawable.i11d);
 				}
-				else if(this.icon.equals("i06d")){
+				else if(this.icon.equals("i13d")){
 					imagen.setImageResource(R.drawable.i13d);
 				}
-				else if(this.icon.equals("i06d")){
+				else if(this.icon.equals("i50d")){
 					imagen.setImageResource(R.drawable.i50d);
 				}
+				else
+					Log.i("CLIMA", "else");
 				
 			}else{
 				Log.i("INFO", "Error obteniendo el clima");

@@ -3,4 +3,5 @@
     <string name="title_activity_welcome">Welcome</string>
     <string name="text_welcome">Welcome</string>
     <string name="button_next">Next</string>
+    <string name="msg">This application is to warn and share the sighting of the space station in the sky</string>
 </resources>
