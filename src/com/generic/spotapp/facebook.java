@@ -29,16 +29,15 @@ public class facebook extends AsyncTask<String, Integer, Boolean>{
 	
 	
 	
-	Context context;
+	
 	
 	String mensaje;
 
 	String post;
 	
-	facebook(String post, Context context)
+	facebook(String post)
 	{
 		
-		this.context = context;
 		this.post = post;
 	}
 	
