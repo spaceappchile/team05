@@ -3,6 +3,5 @@
     <string name="title_activity_welcome">Bienvenidos</string>
     <string name="text_welcome">Bienvenidos</string>
     <string name="button_next">Siguiente</string>
-    <string name="msg">Esta aplicacion consiste en avisar y compartir el avistamiento de la estacion espacial en el cielo. 
-        Podras ver los avistamientos de otras personas en el mundo</string>
+    <string name="msg">Esta aplicación te permite recibir notificaciones y compartir avistamientos de la ISS en el cielo.</string>
 </resources>

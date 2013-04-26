@@ -11,11 +11,11 @@
     <string name="map_whale">Avistamiento</string> 
     <string name="mode_map">Cambiar modo</string>  
     <string name="menu_change_normal">Modo normal</string>
-    <string name="menu_change_hybrid">Modo hibrido</string>
-    <string name="menu_change_satellite">Modo satelite</string>
+    <string name="menu_change_hybrid">Modo híbrido</string> 
+    <string name="menu_change_satellite">Modo satélite</string> 
     <string name="menu_change_terrain">Modo terreno</string>
-    <string name="main_prox_avistamientos">Proximos avistamientos</string>
-    <string name="txt_duracion">Duracion: </string>
+    <string name="main_prox_avistamientos">Próximos avistamientos</string> 
+    <string name="txt_duracion">Duración: </string>
     <string name="action_report">Reportar</string>
 
 </resources>
