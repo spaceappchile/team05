@@ -3,5 +3,7 @@
     <string name="title_activity_welcome">Welcome</string>
     <string name="text_welcome">Welcome</string>
     <string name="button_next">Next</string>
-    <string name="msg">This application is to warn and share the sighting of the space station in the sky</string>
+    <string name="msg">With this app you can add events of the next ISS pass to
+            your calendar and send notifications to others users and your
+            friends on Facebook</string>
 </resources>
