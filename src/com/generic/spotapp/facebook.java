@@ -14,29 +14,33 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
+
+import com.facebook.*;
 
 
 //llamar con: new facebook("I can see now the ISS", this).execute();
 public class facebook extends AsyncTask<String, Integer, Boolean>{
 
 	static private final String FACEBOOK = "https://graph.facebook.com/me/feed?access_token=%s&message=%s";
-	
-	static private final String ACCESS_TOKEN = "BAAHbYnoO8akBAGASFw1fIQq1nJ54etZCjBTGR2zAF74f8rZCmBAW3BHFPXXH4vIcKGCtVolOZBZA5zZBXxoXkYLtcHAohs1qoLDov5eu4ESC2Euuya4Mjh7oSK8UHCe0r4X1LeSxm264XZADVzWjnPylH0tqYg6C5EuzH7NTCjCfW3GaUQpEhlZBLe3bl2JqLxwlEvBDN4WBjGwn5b2QaZB0";
-	
-	
-	
-	
+	String token;
 	
 	
 	String mensaje;
 
 	String post;
 	
-	facebook(String post)
+	facebook(String post, final Context context)
 	{
+		//obtenemos el token si es que el usuario tiene uno
+		SharedPreferences prefs = context.getSharedPreferences(context.getString(R.string.preference_file_key),Context.MODE_PRIVATE);
+		
+		
+		this.token = prefs.getString("FB-TOKEN", null);
+		
 		
 		this.post = post;
 	}
@@ -50,7 +54,7 @@ public class facebook extends AsyncTask<String, Integer, Boolean>{
 		HttpPost request = new HttpPost();
 		
 		Log.i("INFO", "Posteando en FB");
-		String formated = String.format(FACEBOOK, ACCESS_TOKEN, URLEncoder.encode(this.post));
+		String formated = String.format(FACEBOOK, this.token, URLEncoder.encode(this.post));
 
 		try {
 			request.setURI(new URI(formated));

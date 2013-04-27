@@ -267,10 +267,13 @@ public class MainActivity extends Activity {
 		builder.setTitle("Reporte");
 		builder.setMessage("¿Vez la estacion espacial?");
 		  
+		
+		final Context cont = this;
+		
 		builder.setPositiveButton("Sí", new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
-				new facebook("I can see the International Space Station :)").execute();
+				new facebook("I can see the International Space Station :)", cont).execute();
 				new Report("androidID", lat, lng).execute();
 				//push notification to the server
 				
