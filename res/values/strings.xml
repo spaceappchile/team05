@@ -17,7 +17,27 @@
     <string name="menu_change_terrain">Mode terrain</string>
     <string name="main_prox_avistamientos">Next ISS pass</string>
     <string name="txt_duracion">Duration: </string>
-    <string name="action_report">Report</string>
     <string name="app_id">522690977788329</string>
+    <string name="action_gps_report">Report</string>
+    <string name="dialog_gps_title">Confirmation</string>
+    <string name="dialog_gps_message">Want to enable GPS?</string>
+    <string name="dialog_gps_accept">Accept</string>
+    <string name="dialog_gps_cancel">Cancel</string>
+    
+    <string name="dialog_rpt_title">Report</string>
+    <string name="dialog_rpt_message">you can see the International Space Station?</string>
+    <string name="dialog_rpt_yes">Yes</string>
+    <string name="dialog_rpt_no">No</string>
+    
+    <string name="event_calendar_title">Next ISS pass</string>
+    <string name="event_calendar_description">The ISS will pass over you</string>
+    <string name="event_calendar_error">Sorry, no compatible calendar is found!</string>
+    
+    <string name="i_see">I can see the International Space Station :)</string>
+    
+    <string name="msg_error">You can not contact the server</string>      
+    <string name="msg_error1">Failed to make the parse</string>  
+       
+    
 
 </resources>
