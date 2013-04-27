@@ -3,7 +3,6 @@ package com.generic.spotapp;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.http.HttpEntity;
@@ -18,35 +17,22 @@ import org.json.JSONObject;
 
 
 import com.google.android.gcm.GCMRegistrar;
-
-
-
-import android.location.Criteria;
 import android.location.Location;
+import android.location.LocationListener;
 import android.location.LocationManager;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.CalendarContract.Events;
-import android.provider.ContactsContract;
 import android.provider.Settings;
 import android.annotation.SuppressLint;
-import android.app.ActionBar.LayoutParams;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ListActivity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
-import android.database.Cursor;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -54,21 +40,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 
 public class MainActivity extends Activity {
 	
 	private static final String INFO="I:MainActivity";
 	private static final int DIALOGO_CONFIRMACION = 0;
 	private static final int DIALOGO_REPORTE = 1;
+	private static final int DOS_MIN = 1000 * 60 * 2;
+
 	// el tiempo en segundos
 	private ArrayList<Long> longs;
 	// la duracion en segundos
@@ -76,6 +58,12 @@ public class MainActivity extends Activity {
 	// string con la fecha, en ingles
 	private ArrayList<String> cadenas;	
 	private ListView listView;
+	private Location locNetwork;
+	private Location locGps;	
+	private LocationListener listener;
+	private LocationManager locationManager;
+	private String providerNameNetwork;
+	private String providerNameGps;
 	
     
 	double lat = -33.4496866030000035;
@@ -86,18 +74,22 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		// obtiene posicion
+		gpsOn();
+		getPosicion();		
 		
 		duracion = new ArrayList<Integer>();
 		longs = new ArrayList<Long>();
 		cadenas = new ArrayList<String>();
 		
-		
-		// DEBUG
-		
-									
-		//GCMRegistrar.checkDevice(this);
-		
-		new Proximos(10, lat, lng, this).execute();
+		/*
+		if(loc!=null){
+			Log.i("GPS", "onCreate: posicion prox: lat: " + loc.getLatitude() + " long: " + loc.getLongitude() );
+			new Proximos(10, loc.getLatitude(), loc.getLongitude(), this).execute();
+		}
+		else{
+			Log.i(INFO, "onCreate: loc es null");
+		}*/
 		
 		
 		listView = (ListView) findViewById(R.id.lista_avistamientos);
@@ -123,13 +115,12 @@ public class MainActivity extends Activity {
 		
 		// DEBUG
 		//prefs.edit().clear().commit();
-		boolean firstTime = prefs.getBoolean("firstTime", true);
 		
+		boolean firstTime = prefs.getBoolean("firstTime", true);		
 		
 		// muestra pantallan de bienvenida
 		if(firstTime){			
-			Log.i(INFO,"primera vez");
-			
+			Log.i(INFO,"primera vez");			
 			// Clase para poder realizar modificaciones en el archivo
 			SharedPreferences.Editor editor = prefs.edit();
 			// agregamos el dato, firstTime - false
@@ -140,6 +131,20 @@ public class MainActivity extends Activity {
 			goWelcome();
 		}
 		crearAdapter();
+	}
+	protected void onPause(Bundle savedInstanceState){
+		super.onPause();
+		Log.i(INFO,"on pause");
+		if(listener != null){
+			locationManager.removeUpdates(listener);
+		}
+	}
+	protected void onStop(){
+		super.onStop();		
+		Log.i(INFO,"on stop");
+		if(listener != null){
+			locationManager.removeUpdates(listener);
+		}		
 	}
 	
 	private void crearAdapter(){
@@ -168,8 +173,7 @@ public class MainActivity extends Activity {
             	showDialog(DIALOGO_REPORTE); 
             	Log.i("info", "action_report");
             	return true;
-            case R.id.action_settings:
-            	    	
+            case R.id.action_settings:            	    	
             	return true;
         }
         return super.onOptionsItemSelected(item);
@@ -210,16 +214,18 @@ public class MainActivity extends Activity {
 	
 	private void gpsOn(){
 		// para acceder a los servicios de localizacion
-		LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);		
 		
+		/*
 		// criterios
 		Criteria criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE); // localizacion exacta
         criteria.setCostAllowed(false); 			  // sin costo monetario
         // pregunta si hay un proveedor con estas caracteristicas
-        String providerName = locationManager.getBestProvider(criteria, true);
-       
-        Log.i(INFO,"bestProvider: " + providerName);
+         * 
+         */
+        providerNameNetwork = LocationManager.NETWORK_PROVIDER;        
+        providerNameGps = LocationManager.GPS_PROVIDER;        
         
         // retorna true, si el gps esta activado		
         final boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
@@ -230,28 +236,182 @@ public class MainActivity extends Activity {
 			showDialog(DIALOGO_CONFIRMACION);
 			Log.d("PRUEBA GPS", "GPS apagado");
 		}
-	}
-	
+	}	
 	
 	public void activarGps(){
 		Intent settingsIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
 	    startActivity(settingsIntent);		
 	}
 	
+	// decide cual de las dos fuentes es mejor, network o gps
+	public void getPosicion(){
+		getKnownPosNetwork();
+		getKnownPosGps();
+		
+		if(locNetwork==null){
+			Log.i("GPS", "getPosicion:locNetwork == null");
+			return;
+		}
+		if(isBetterLocation(locNetwork,locGps)){
+			Log.i("GPS", "onCreate-else: posicion prox: lat: " + locNetwork.getLatitude() + " long: " + locNetwork.getLongitude() );
+			new Proximos(10, locNetwork.getLatitude(), locNetwork.getLongitude(), this).execute();
+		}
+		else{			
+			Log.i("GPS", "onCreate-if: posicion prox: lat: " + locGps.getLatitude() + " long: " + locGps.getLongitude() );
+			new Proximos(10, locGps.getLatitude(), locGps.getLongitude(), this).execute();
+		}
+		getActualPosGps();
+		getActualPosNetwork();
+	}
+	
+	private void getKnownPosNetwork(){		
+		locNetwork = locationManager.getLastKnownLocation(providerNameNetwork);	
+		if(locNetwork!=null){
+			Log.i("GPS", "NW:getKnownPos: lat: " + locNetwork.getLatitude() + " long: " + locNetwork.getLongitude());
+		}
+	}	
+	
+	private void getActualPosNetwork(){ 	    
+	    	    
+	    listener = new LocationListener() {			
+			//Lanzado cada vez que se recibe una actualización de la posición.
+		    @Override
+		    public void onLocationChanged(Location location) {
+		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );	
+		    	locNetwork=location;
+		    	Log.i("GPS", "cambio la localizacion");		    			    		    	
+		    }		    
+			//Lanzado cuando el proveedor se deshabilita.
+			@Override
+			public void onProviderDisabled(String provider) {		
+
+			}			
+			//Lanzado cuando el proveedor se habilita.
+			@Override
+			public void onProviderEnabled(String provider) {
+			
+			}			
+			// Lanzado cada vez que el proveedor cambia 
+			// su estado, que puede variar entre OUT_OF_SERVICE, TEMPORARILY_UNAVAILABLE, AVAILABLE.
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+				Log.i("LocAndroid", "Provider Status: " + status);				
+			}		    
+		};	
+		if(locationManager !=null){
+			locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60*1000*10, 30, listener);
+		}else{
+			Log.i("GPS", "location Manager es null");
+		}
+	}
+	
+	// obtiene la posicion conocida
+	private void getKnownPosGps(){		
+		locGps = locationManager.getLastKnownLocation(providerNameGps);	
+		if(locGps!=null){
+			Log.i("GPS", "GPS:getKnownPos: lat: " + locGps.getLatitude() + " long: " + locGps.getLongitude());
+		}
+	}	
+	
+	private void getActualPosGps(){ 	    
+	    	    
+	    listener = new LocationListener() {			
+			//Lanzado cada vez que se recibe una actualización de la posición.
+		    @Override
+		    public void onLocationChanged(Location location) {
+		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );	
+		    	locGps=location;
+		    	Log.i("GPS", "cambio la localizacion");		    			    		    	
+		    }		    
+			//Lanzado cuando el proveedor se deshabilita.
+			@Override
+			public void onProviderDisabled(String provider) {		
+
+			}			
+			//Lanzado cuando el proveedor se habilita.
+			@Override
+			public void onProviderEnabled(String provider) {
+			
+			}			
+			// Lanzado cada vez que el proveedor cambia 
+			// su estado, que puede variar entre OUT_OF_SERVICE, TEMPORARILY_UNAVAILABLE, AVAILABLE.
+			@Override
+			public void onStatusChanged(String provider, int status, Bundle extras) {
+				Log.i("LocAndroid", "Provider Status: " + status);				
+			}		    
+		};	
+		if(locationManager !=null){
+			locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60*1000*10, 30, listener);
+		}else{
+			Log.i("GPS", "location Manager es null");
+		}
+	}
+	// devuelve true cuando la nueva location es mejor que currentBestLocation
+	protected boolean isBetterLocation(Location location, Location currentBestLocation) {
+	    if (currentBestLocation == null) {	        
+	        return true;
+	    }
+	    
+	    long timeDelta = location.getTime() - currentBestLocation.getTime();
+	    boolean isSignificantlyNewer = timeDelta > DOS_MIN;
+	    boolean isSignificantlyOlder = timeDelta < -DOS_MIN;
+	    boolean isNewer = timeDelta > 0;
+	    
+	    if (isSignificantlyNewer) {
+	        return true;
+	    
+	    } else if (isSignificantlyOlder) {
+	        return false;
+	    }
+
+	    // Check whether the new location fix is more or less accurate
+	    int accuracyDelta = (int) (location.getAccuracy() - currentBestLocation.getAccuracy());
+	    boolean isLessAccurate = accuracyDelta > 0;
+	    boolean isMoreAccurate = accuracyDelta < 0;
+	    boolean isSignificantlyLessAccurate = accuracyDelta > 200;
+
+	    // Check if the old and new location are from the same provider
+	    boolean isFromSameProvider = esIgual(location.getProvider(),
+	            currentBestLocation.getProvider());
+
+	    // Determine location quality using a combination of timeliness and accuracy
+	    if (isMoreAccurate) {
+	        return true;
+	    } else if (isNewer && !isLessAccurate) {
+	        return true;
+	    } else if (isNewer && !isSignificantlyLessAccurate && isFromSameProvider) {
+	        return true;
+	    }
+	    return false;
+	}
+	
+	private boolean esIgual(String provider1, String provider2) {
+	    if (provider1 == null) {
+	      return provider2 == null;
+	    }
+	    return provider1.equals(provider2);
+	}
+
+	
 	private Dialog crearDialogoConfirmacion(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		String title = getResources().getString(R.string.dialog_gps_title);
+		String messege = getResources().getString(R.string.dialog_gps_message);
+		String accept = getResources().getString(R.string.dialog_gps_accept);
+		String cancel = getResources().getString(R.string.dialog_gps_cancel);
+		
 		 
-		builder.setTitle("Confirmacion");
-		builder.setMessage("¿activar GPS?");
+		builder.setTitle(title);
+		builder.setMessage(messege);
 		  
-		builder.setPositiveButton("Aceptar", new OnClickListener() {
+		builder.setPositiveButton(accept, new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
 				activarGps();
 				dialog.cancel();
 			}
 		});
-		builder.setNegativeButton("Cancelar", new OnClickListener() {
+		builder.setNegativeButton(cancel, new OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
 		        Log.i(INFO, "Confirmacion Cancelada.");
 		        dialog.cancel();
@@ -263,21 +423,27 @@ public class MainActivity extends Activity {
 	
 	private Dialog crearDialogoReporte(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		String title = getResources().getString(R.string.dialog_rpt_title);
+		String message = getResources().getString(R.string.dialog_rpt_message);
+		String yes = getResources().getString(R.string.dialog_rpt_yes);
+		String no = getResources().getString(R.string.dialog_rpt_no);
+				
 		 
-		builder.setTitle("Reporte");
-		builder.setMessage("¿Vez la estacion espacial?");
+		builder.setTitle(title);
+		builder.setMessage(message);
 		  
-		builder.setPositiveButton("Sí", new OnClickListener() {
+		builder.setPositiveButton(yes, new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
-				new facebook("I can see the International Space Station :)").execute();
+				String iSee = getResources().getString(R.string.i_see);
+				new facebook(iSee).execute();
 				new Report("androidID", lat, lng).execute();
 				//push notification to the server
 				
 				dialog.cancel();
 			}
 		});
-		builder.setNegativeButton("No", new OnClickListener() {
+		builder.setNegativeButton(no, new OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
 		        Log.i(INFO, "Confirmacion Cancelada.");
 		        dialog.cancel();
@@ -289,14 +455,19 @@ public class MainActivity extends Activity {
 	
 	private void nuevoEventoCalendario(int duracion, long tiempo, Context ctx){
 		   Intent l_intent = new Intent(Intent.ACTION_EDIT);
-
+		   String title = getResources().getString(R.string.event_calendar_title);
+		   String description = getResources().getString(R.string.event_calendar_description);
+		   String error = getResources().getString(R.string.event_calendar_error);
+		   
+		   
+		   
 		   l_intent.setType("vnd.android.cursor.item/event");
 
 		   //l_intent.putExtra("calendar_id", m_selectedCalendarId);  //this doesn't work
 
-		   l_intent.putExtra("title", "Next ISS pass");
+		   l_intent.putExtra("title", title);
 
-		   l_intent.putExtra("description", "The ISS will pass over you");
+		   l_intent.putExtra("description", description);
 
 		   l_intent.putExtra("eventLocation", "@home");
 
@@ -327,7 +498,7 @@ public class MainActivity extends Activity {
 
 		   } catch (Exception e) {
 
-		       Toast.makeText(ctx.getApplicationContext(), "Sorry, no compatible calendar is found!", Toast.LENGTH_LONG).show();
+		       Toast.makeText(ctx.getApplicationContext(), error, Toast.LENGTH_LONG).show();
 		   }	
 	}
 	
@@ -412,7 +583,7 @@ public class MainActivity extends Activity {
 					
 				} catch (Exception e) {
 					
-					this.mensaje = "No se puede contactar con el servidor";
+					this.mensaje = getResources().getString(R.string.msg_error);
 					return false;
 				}
 				
@@ -445,7 +616,7 @@ public class MainActivity extends Activity {
 					}
 				
 				}catch (Exception e){
-					this.mensaje = "Error al hacer el parse";
+					this.mensaje = getResources().getString(R.string.msg_error1);
 					this.pass = null;
 					return false;
 				}

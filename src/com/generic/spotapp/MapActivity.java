@@ -80,11 +80,7 @@ public class MapActivity extends FragmentActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_map);
 		
-		imagen=(ImageView)findViewById(R.id.imagen_clima); 
-		
-		
-		
-		
+		imagen=(ImageView)findViewById(R.id.imagen_clima); 		
 		
 		gpsOn();
 		setUpMapIfNeeded();
@@ -94,7 +90,7 @@ public class MapActivity extends FragmentActivity {
 		//new Clima(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()).execute();
 		
 		//new Trayectoria().execute();
-		new GetOthers().execute();
+		//new GetOthers().execute();
 	}
 	
 	@Override
@@ -274,9 +270,12 @@ public class MapActivity extends FragmentActivity {
 		//buscamos la informacion sobre el clima
 		if(mMap.getMyLocation()!=null){
 			
-			//new Clima(loc.getLatitude(), loc.getLongitude()).execute();
+			new Clima(loc.getLatitude(), loc.getLongitude()).execute();
 		}
-		new Clima(-33.44989201,-70.68687829).execute();
+		else{
+			Log.i(INFO,"mMap es null, no se obtiene clima" );
+		}
+		//new Clima(-33.44989201,-70.68687829).execute();
 		
     }
 	
@@ -351,7 +350,7 @@ public class MapActivity extends FragmentActivity {
 		// criterios
 		criteria = new Criteria();
         criteria.setAccuracy(Criteria.ACCURACY_FINE); // localizacion exacta
-        criteria.setCostAllowed(false); 			  // sin costo monetario
+        criteria.setCostAllowed(true); 			  // sin costo monetario
         // pregunta si hay un proveedor con estas caracteristicas
         String providerName = locationManager.getBestProvider(criteria, true);
         Log.i(INFO,"bestProvider: " + providerName);
@@ -380,8 +379,7 @@ public class MapActivity extends FragmentActivity {
 
 		//Obtenemos una referencia al LocationManager
 		locationManager =
-	        (LocationManager)getSystemService(Context.LOCATION_SERVICE);
-	 
+	        (LocationManager)getSystemService(Context.LOCATION_SERVICE); 
 	    	    
 	    //showMarket(loc, "Tu posicion");
 	    
@@ -391,14 +389,12 @@ public class MapActivity extends FragmentActivity {
 		    public void onLocationChanged(Location location) {
 		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );		    	
 		    	//showMarket(location,"Tu posicion");			    		    	
-		    }
-		    
+		    }		    
 			//Lanzado cuando el proveedor se deshabilita.
 			@Override
 			public void onProviderDisabled(String provider) {		
 
-			}
-			
+			}			
 			//Lanzado cuando el proveedor se habilita.
 			@Override
 			public void onProviderEnabled(String provider) {
@@ -508,17 +504,9 @@ public class MapActivity extends FragmentActivity {
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}
-			
-			
-		}
-		
-		
-		
+			}	
+		}		
 	}
-	
-	
-	
 	
 	
 	class Clima extends AsyncTask<String, Integer, Boolean>{
@@ -618,7 +606,7 @@ public class MapActivity extends FragmentActivity {
 			}else{				
 				this.clima = "Clear";
 				this.descripcion = "Sky is Clear";
-				this.icon = "i01d";			
+				this.icon = "i09d";			
 				
 				return true;
 			}
@@ -632,31 +620,31 @@ public class MapActivity extends FragmentActivity {
 			if(response)
 			{				
 				if(this.icon.equals("i01d")){
-					imagen.setImageResource(R.drawable.i01d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i02d")){
 					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i03d")){
-					imagen.setImageResource(R.drawable.i03d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i04d")){
-					imagen.setImageResource(R.drawable.i04d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i05d")){
-					imagen.setImageResource(R.drawable.i09d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i10d")){
-					imagen.setImageResource(R.drawable.i10d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i11d")){
-					imagen.setImageResource(R.drawable.i11d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i13d")){
-					imagen.setImageResource(R.drawable.i13d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i50d")){
-					imagen.setImageResource(R.drawable.i50d);
+					imagen.setImageResource(R.drawable.i02d);
 				}
 				else
 					Log.i("CLIMA", "else");
@@ -737,14 +725,8 @@ public class MapActivity extends FragmentActivity {
 				Log.i("OTHERS", this.mensaje);
 			}
 			
-		}
-		
-		
-		
-	}
-	
-	
-	
+		}		
+	}	
 }
 	
 
