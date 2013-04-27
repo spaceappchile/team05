@@ -131,6 +131,13 @@ public class MainActivity extends Activity {
 			goWelcome();
 		}
 		crearAdapter();
+		
+		
+		Intent intent=new Intent(this, LoginActivity.class);
+		
+		startActivity(intent);
+		
+		
 	}
 	protected void onPause(Bundle savedInstanceState){
 		super.onPause();
