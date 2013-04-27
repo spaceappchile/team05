@@ -128,14 +128,10 @@ public class LoginActivity extends Activity {
 		Log.i("Facebook", "Enviando mensaje");
 		
 		
-		Log.i("Facebook", "Token: " + fb.getAccessToken());
+	
 		
 		Bundle params = new Bundle();
 		
-		params.putString("name", "SpotApp");
-		params.putString("description", "With SpotApp you can add alerts on when the ISS will pass over your position");
-		params.putString("link", "http://spaceappschallenge.org/project/spotapp/");
-		params.putString("message", "I can see the ISS right now");
 		
 		
 		this.fb.dialog(this, "feed", new DialogListener() {
@@ -143,25 +139,25 @@ public class LoginActivity extends Activity {
 			@Override
 			public void onFacebookError(FacebookError e) {
 				// TODO Auto-generated method stub
-				
+				finish();
 			}
 			
 			@Override
 			public void onError(DialogError e) {
 				// TODO Auto-generated method stub
-				
+				finish();
 			}
 			
 			@Override
 			public void onComplete(Bundle values) {
 				// TODO Auto-generated method stub
-				
+				finish();
 			}
 			
 			@Override
 			public void onCancel() {
 				// TODO Auto-generated method stub
-				
+				finish();
 			}
 		});
 			

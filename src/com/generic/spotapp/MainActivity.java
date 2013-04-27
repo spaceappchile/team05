@@ -133,9 +133,9 @@ public class MainActivity extends Activity {
 		crearAdapter();
 		
 		
-		Intent intent=new Intent(this, LoginActivity.class);
+		//Intent intent=new Intent(this, LoginActivity.class);
 		
-		startActivity(intent);
+		//startActivity(intent);
 		
 		
 	}
@@ -447,7 +447,12 @@ public class MainActivity extends Activity {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
 				String iSee = getResources().getString(R.string.i_see);
-				new facebook(iSee, cont).execute();
+				
+				Intent intent= new Intent(cont, LoginActivity.class);
+				
+				startActivityForResult(intent, 0);
+				
+				
 				new Report("androidID", lat, lng).execute();
 				//push notification to the server
 				
