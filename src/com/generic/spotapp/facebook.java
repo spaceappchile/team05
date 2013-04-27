@@ -20,6 +20,7 @@ import android.util.Log;
 
 
 
+//import com.facebook.*;
 
 
 //llamar con: new facebook("I can see now the ISS", this).execute();

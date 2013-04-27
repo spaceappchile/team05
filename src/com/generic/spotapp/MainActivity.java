@@ -32,6 +32,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.DialogInterface.OnClickListener;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDatabase.CursorFactory;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -59,11 +62,14 @@ public class MainActivity extends Activity {
 	private ArrayList<String> cadenas;	
 	private ListView listView;
 	private Location locNetwork;
+	private Location loc;
 	private Location locGps;	
 	private LocationListener listener;
 	private LocationManager locationManager;
 	private String providerNameNetwork;
 	private String providerNameGps;
+	private FechaSQLiteHelper fechaSql;
+	private SQLiteDatabase dataFechaSql;
 	
     
 	double lat = -33.4496866030000035;
@@ -74,7 +80,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		// obtiene posicion
+		//obtiene posicion
 		gpsOn();
 		getPosicion();		
 		
@@ -82,14 +88,8 @@ public class MainActivity extends Activity {
 		longs = new ArrayList<Long>();
 		cadenas = new ArrayList<String>();
 		
-		/*
-		if(loc!=null){
-			Log.i("GPS", "onCreate: posicion prox: lat: " + loc.getLatitude() + " long: " + loc.getLongitude() );
-			new Proximos(10, loc.getLatitude(), loc.getLongitude(), this).execute();
-		}
-		else{
-			Log.i(INFO, "onCreate: loc es null");
-		}*/
+		
+		fechaSql = new FechaSQLiteHelper(this, "fechas", null, 1);				
 		
 		
 		listView = (ListView) findViewById(R.id.lista_avistamientos);
@@ -262,10 +262,12 @@ public class MainActivity extends Activity {
 		if(isBetterLocation(locNetwork,locGps)){
 			Log.i("GPS", "onCreate-else: posicion prox: lat: " + locNetwork.getLatitude() + " long: " + locNetwork.getLongitude() );
 			new Proximos(10, locNetwork.getLatitude(), locNetwork.getLongitude(), this).execute();
+			loc = locNetwork;
 		}
 		else{			
 			Log.i("GPS", "onCreate-if: posicion prox: lat: " + locGps.getLatitude() + " long: " + locGps.getLongitude() );
 			new Proximos(10, locGps.getLatitude(), locGps.getLongitude(), this).execute();
+			loc = locGps;
 		}
 		getActualPosGps();
 		getActualPosNetwork();
@@ -399,7 +401,7 @@ public class MainActivity extends Activity {
 	    return provider1.equals(provider2);
 	}
 
-	
+	// dialogo para el mensaje que pregunta si se quiere activar el gps
 	private Dialog crearDialogoConfirmacion(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		String title = getResources().getString(R.string.dialog_gps_title);
@@ -438,9 +440,7 @@ public class MainActivity extends Activity {
 		 
 		builder.setTitle(title);
 		builder.setMessage(message);
-		  
-                
-		
+				
 		final Context cont = this;
 		
 		builder.setPositiveButton(yes, new OnClickListener() {
@@ -450,10 +450,12 @@ public class MainActivity extends Activity {
 				
 				Intent intent= new Intent(cont, LoginActivity.class);
 				
-				startActivityForResult(intent, 0);
+				startActivityForResult(intent, 0);								
 				
-				
-				new Report("androidID", lat, lng).execute();
+				if(loc!=null){
+					new Report("androidID", loc.getLatitude(), loc.getLongitude()).execute();
+				}
+
 				//push notification to the server
 				
 				dialog.cancel();
@@ -517,6 +519,25 @@ public class MainActivity extends Activity {
 		       Toast.makeText(ctx.getApplicationContext(), error, Toast.LENGTH_LONG).show();
 		   }	
 	}
+	
+	// agrega fechas a la base de datos sql
+	private void agregarDato(String fecha){
+		dataFechaSql = fechaSql.getWritableDatabase();
+		dataFechaSql.execSQL("INSERT INTO Fechas (fecha) VALUES ('"+ fecha +"')");
+		dataFechaSql.close();
+	}
+	private void agregarDato(ArrayList<String> fechas){
+		dataFechaSql = fechaSql.getWritableDatabase();
+		for(int i=0; i< fechas.size(); i++){
+			dataFechaSql.execSQL("INSERT INTO Fechas (fecha) VALUES ('"+ fechas.get(i) +"')");
+		}
+		dataFechaSql.close();
+	}
+	
+	
+	
+	
+	
 	
 	public class MiAdapter extends ArrayAdapter<String>{
 		private Context ctx;
@@ -652,6 +673,7 @@ public class MainActivity extends Activity {
 				return true;				
 			}			
 		}
+		
 
 
 	    @SuppressLint("NewApi")
@@ -676,13 +698,15 @@ public class MainActivity extends Activity {
 					// se agregan la duracion en segundos
 					duracion.add(pass.get(i).duration);
 					// se agrega la fecha en string
+					String []spl;
+					spl = fecha.toString().split(" ", 4);
+					
 					cadenas.add(fecha.toString());
 				}
 				
 				Log.i("INFO", "terminado de poner los eventos");
 				
 				crearAdapter();
-
 			}else{
 				Utils.showError(this.mensaje, this.context);
 			}
@@ -751,28 +775,54 @@ public class MainActivity extends Activity {
 
 		/**Pass class with the duration and risetime
 		 * */
-		class Pass{
-			
-			//duration: Number of seconds the pass will last
-			
-			final int duration;
-			
-			//unix time stamp when the ISS will be above 10°
-			final long risetime;
-			
-			
-			Pass(int duration, long risetime)
-			{
-				this.duration = duration;
-				this.risetime = risetime;
-			}
-		}		
-		
-		class ErrorOpenNofify extends Exception {
-		    public ErrorOpenNofify(String message) {
-		        super(message);
-		    }
-		}
+class Pass{
+	
+	//duration: Number of seconds the pass will last
+	
+	final int duration;
+	
+	//unix time stamp when the ISS will be above 10°
+	final long risetime;
+	
+	
+	Pass(int duration, long risetime)
+	{
+		this.duration = duration;
+		this.risetime = risetime;
+	}
+}		
 
+class ErrorOpenNofify extends Exception {
+    public ErrorOpenNofify(String message) {
+        super(message);
+    }
+}
+
+class FechaSQLiteHelper extends SQLiteOpenHelper {
+	 
+    //Sentencia SQL para crear la tabla
+    String sqlCreate = "CREATE TABLE Fechas (_id INTEGER PRIMARY KEY AUTOINCREMENT, fecha TEXT)";
+ 
+    public FechaSQLiteHelper(Context contexto, String nombre,
+                               CursorFactory factory, int version) {
+        super(contexto, nombre, factory, version);
+    }
+ 
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        //Se ejecuta la sentencia SQL de creación de la tabla
+        db.execSQL(sqlCreate);
+    }
+ 
+    @Override
+    public void onUpgrade(SQLiteDatabase db, int versionAnterior, int versionNueva) {      
+ 
+        //Se elimina la versión anterior de la tabla
+        db.execSQL("DROP TABLE IF EXISTS Usuarios");
+ 
+        //Se crea la nueva versión de la tabla
+        db.execSQL(sqlCreate);
+    }    
+}
 
 

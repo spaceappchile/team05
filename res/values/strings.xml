@@ -17,8 +17,10 @@
     <string name="menu_change_terrain">Mode terrain</string>
     <string name="main_prox_avistamientos">Next ISS pass</string>
     <string name="txt_duracion">Duration: </string>
-    <string name="app_id">522690977788329</string>
-    <string name="action_gps_report">Report</string>
+    <string name="app_id">522690977788329</string>  
+      
+    <string name="action_report">Report</string>
+     
     <string name="dialog_gps_title">Confirmation</string>
     <string name="dialog_gps_message">Want to enable GPS?</string>
     <string name="dialog_gps_accept">Accept</string>

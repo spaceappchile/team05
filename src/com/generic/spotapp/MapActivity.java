@@ -83,12 +83,10 @@ public class MapActivity extends FragmentActivity {
 		imagen=(ImageView)findViewById(R.id.imagen_clima); 		
 		
 		gpsOn();
+		
 		setUpMapIfNeeded();
 		
-		modeNormal=(MenuItem) findViewById(R.id.change_normal);
-		//buscamos la informacion sobre el clima
-		//new Clima(mMap.getMyLocation().getLatitude(), mMap.getMyLocation().getLongitude()).execute();
-		
+				
 		//new Trayectoria().execute();
 		//new GetOthers().execute();
 	}
@@ -97,19 +95,12 @@ public class MapActivity extends FragmentActivity {
     protected void onResume() {
 		super.onResume();
         setUpMapIfNeeded();
-        
+        /*
         getKnownPos();
         getActualPos();
+        */
     }
 	
-	@Override
-	protected void onStop(){
-		super.onStop();
-		// Remove the listener you previously added
-		locationManager.removeUpdates(listener);
-		Log.i(INFO, "no obtener posicion");
-	}
-
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -122,79 +113,62 @@ public class MapActivity extends FragmentActivity {
 	@Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         super.onPrepareOptionsMenu(menu);
-        
-        int mode = mMap.getMapType();
-        
-        switch(mode){
-       		case 1:
-       			modeNormal = menu.findItem(R.id.change_normal);
-       			modeNormal.setChecked(true);
-       			Log.i(INFO,"is checked");
-       			break;
-			case 2:
-				modeSatellite = menu.findItem(R.id.change_satellite);
-				modeSatellite.setChecked(true);
-	            break;
-			case 3:
-				modeTerrain = menu.findItem(R.id.change_terrain);
-				modeTerrain.setChecked(true);				
-	            break;
-			case 4:
-				modeHybrid = menu.findItem(R.id.change_hybrid);
-				modeHybrid.setChecked(true);				
-	            break;	        
-        }               
-        
-        return true;        
+        if(mMap!=null){
+	        int mode = mMap.getMapType();
+	        
+	        switch(mode){
+	       		case 1:
+	       			modeNormal = menu.findItem(R.id.change_normal);
+	       			modeNormal.setChecked(true);
+	       			unCheckOther(1);
+	       			Log.i(INFO,"is checked");
+	       			break;
+				case 2:
+					modeSatellite = menu.findItem(R.id.change_satellite);
+					modeSatellite.setChecked(true);
+		            break;
+				case 3:
+					modeTerrain = menu.findItem(R.id.change_terrain);
+					modeTerrain.setChecked(true);				
+		            break;
+				case 4:
+					modeHybrid = menu.findItem(R.id.change_hybrid);
+					modeHybrid.setChecked(true);				
+		            break;	        
+        	}               
+	        return true;
+        }
+        return false;
     }
 	
-	 public boolean onMenuItemSelected(int id, MenuItem item){
+	 private void unCheckOther(int i) {
+		
+		
+	}
+
+	public boolean onMenuItemSelected(int id, MenuItem item){
 		 
 		 switch (item.getItemId()) {
-	    	case R.id.change_normal:    		
-	    		changeModeMap(1);
+		 case R.id.change_normal:    	
+	    		mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);	    		
 	            return true;   
 	            
 	    	case R.id.change_satellite:
-	    		changeModeMap(2);
+	    		mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
 	    		return true;	
 	    		
 	    	case R.id.change_terrain:
-	    		changeModeMap(3);
+	    		mMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 	    		return true;
 	    		
 	    	case R.id.change_hybrid:
-	    		changeModeMap(4);
+	    		mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 	    		return true;
 		 }
 		 
 		 return true;		 
 	 }
-	
-	 // esto no
-	// metodo que observa las pulsaciones del menu opciones
-	public boolean onOptionsItemSelected(MenuItem item) {	
 		
-		switch (item.getItemId()) {
-	    	case R.id.change_normal:    		
-	    		changeModeMap(1);
-	            return true;   
-	            
-	    	case R.id.change_satellite:
-	    		changeModeMap(2);
-	    		return true;	
-	    		
-	    	case R.id.change_terrain:
-	    		changeModeMap(3);
-	    		return true;
-	    		
-	    	case R.id.change_hybrid:
-	    		changeModeMap(4);
-	    		return true;
-	    }
-		return super.onOptionsItemSelected(item); 
-	}
-	
 	// crea los dialogos
 	protected Dialog onCreateDialog(int id) {
 		   	Dialog dialogo = null;
@@ -216,18 +190,23 @@ public class MapActivity extends FragmentActivity {
 	// configuracion del mensaje/dialogo
 	private Dialog crearDialogoConfirmacion(){
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		String title = getResources().getString(R.string.dialog_gps_title);
+		String messege = getResources().getString(R.string.dialog_gps_message);
+		String accept = getResources().getString(R.string.dialog_gps_accept);
+		String cancel = getResources().getString(R.string.dialog_gps_cancel);
+		
 		 
-		builder.setTitle("Confirmacion");
-		builder.setMessage("¿activar GPS?");
+		builder.setTitle(title);
+		builder.setMessage(messege);
 		  
-		builder.setPositiveButton("Aceptar", new OnClickListener() {
+		builder.setPositiveButton(accept, new OnClickListener() {
 			public void onClick(DialogInterface dialog, int which) {
 				Log.i(INFO, "Confirmacion Aceptada.");
 				activarGps();
 				dialog.cancel();
 			}
 		});
-		builder.setNegativeButton("Cancelar", new OnClickListener() {
+		builder.setNegativeButton(cancel, new OnClickListener() {
 		    public void onClick(DialogInterface dialog, int which) {
 		        Log.i(INFO, "Confirmacion Cancelada.");
 		        dialog.cancel();
@@ -258,13 +237,14 @@ public class MapActivity extends FragmentActivity {
     }
 	
 	private void setUpMap() {
-		Location loc = mMap.getMyLocation();
+		loc = mMap.getMyLocation();
 		
 		if(loc!=null)
 			changePosCam2(loc);
 		else
 			Log.i(INFO,"Mylocation is null");
-		
+		if(mMap==null)
+			Log.i("GPS", "setUpMap: mMap es nulo");
 		addmarkers();
 	
 		//buscamos la informacion sobre el clima
@@ -283,7 +263,7 @@ public class MapActivity extends FragmentActivity {
 		
 		switch(mode){
 			case 1:
-				mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+				
 	            break;
 			case 2:
 				mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
@@ -387,8 +367,8 @@ public class MapActivity extends FragmentActivity {
 			//Lanzado cada vez que se recibe una actualización de la posición.
 		    @Override
 		    public void onLocationChanged(Location location) {
-		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );		    	
-		    	//showMarket(location,"Tu posicion");			    		    	
+		    	Log.i(INFO, "pos Lat: " + location.getLatitude() + " lon: " + location.getLongitude() );		   	
+		    			    		    	
 		    }		    
 			//Lanzado cuando el proveedor se deshabilita.
 			@Override
@@ -502,7 +482,6 @@ public class MapActivity extends FragmentActivity {
 				
 				
 			} catch (JSONException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}	
 		}		
@@ -715,8 +694,7 @@ public class MapActivity extends FragmentActivity {
 					}
 					
 					
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
+				} catch (Exception e) {					
 					e.printStackTrace();
 				}
 				
