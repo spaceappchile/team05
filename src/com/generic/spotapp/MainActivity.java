@@ -16,7 +16,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 
-import com.google.android.gcm.GCMRegistrar;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -76,10 +75,14 @@ public class MainActivity extends Activity {
 	double lng = -70.687233315499995;
 	
 	
+
+	@SuppressLint("NewApi")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		listView = (ListView) findViewById(R.id.lista_avistamientos);
+				
 		//obtiene posicion
 		gpsOn();
 		getPosicion();		
@@ -91,8 +94,6 @@ public class MainActivity extends Activity {
 		
 		fechaSql = new FechaSQLiteHelper(this, "fechas", null, 1);				
 		
-		
-		listView = (ListView) findViewById(R.id.lista_avistamientos);
 		registerForContextMenu(listView);
 		
 		// escucha toques en los elementos de la lista
@@ -454,6 +455,9 @@ public class MainActivity extends Activity {
 				
 				if(loc!=null){
 					new Report("androidID", loc.getLatitude(), loc.getLongitude()).execute();
+				}
+				else{
+					Log.i("REPORT", "dialog: loc es null");
 				}
 
 				//push notification to the server

@@ -16,7 +16,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
@@ -53,8 +52,6 @@ import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.CheckBox;
 import android.widget.ImageView;
 
 public class MapActivity extends FragmentActivity {
@@ -88,7 +85,7 @@ public class MapActivity extends FragmentActivity {
 		
 				
 		//new Trayectoria().execute();
-		//new GetOthers().execute();
+		new GetOthers().execute();
 	}
 	
 	@Override
@@ -222,8 +219,10 @@ public class MapActivity extends FragmentActivity {
         // Do a null check to confirm that we have not already instantiated the map.
         if (mMap == null) {
             // Try to obtain the map from the SupportMapFragment.
+        	
             mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
                     .getMap();
+                            	
             // Check if we were successful in obtaining the map.
             if (mMap != null) {
             	// MyLocation es para obtener la posicion
@@ -461,7 +460,7 @@ public class MapActivity extends FragmentActivity {
 				
 				JSONArray array = json.getJSONArray("lista");
 				
-				List<LatLng> coor = new ArrayList();
+				List<LatLng> coor = new ArrayList<LatLng>();
 				
 				for(int i = 0; i < array.length(); i++)
 				{
