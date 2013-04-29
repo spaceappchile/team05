@@ -86,6 +86,7 @@ public class MapActivity extends FragmentActivity {
 				
 		//new Trayectoria().execute();
 		new GetOthers().execute();
+		
 	}
 	
 	@Override
@@ -236,24 +237,16 @@ public class MapActivity extends FragmentActivity {
     }
 	
 	private void setUpMap() {
-		loc = mMap.getMyLocation();
 		
-		if(loc!=null)
-			changePosCam2(loc);
-		else
-			Log.i(INFO,"Mylocation is null");
-		if(mMap==null)
-			Log.i("GPS", "setUpMap: mMap es nulo");
 		addmarkers();
 	
+		
 		//buscamos la informacion sobre el clima
-		if(mMap.getMyLocation()!=null){
-			
-			new Clima(loc.getLatitude(), loc.getLongitude()).execute();
-		}
-		else{
-			Log.i(INFO,"mMap es null, no se obtiene clima" );
-		}
+		
+			// TODO problema
+		new Clima(MainActivity.latNow, MainActivity.lngNow).execute();
+		
+		
 		//new Clima(-33.44989201,-70.68687829).execute();
 		
     }
@@ -393,7 +386,7 @@ public class MapActivity extends FragmentActivity {
 	 * Para agregar varios avistamientos
 	 */	
 	private void addmarkers(){		
-		addmarker(-33.44989201, -70.68687829, "Avistamiento", "el dia ...");	
+
 	}
 	
 	/* agrega un avistamiento
@@ -529,7 +522,7 @@ public class MapActivity extends FragmentActivity {
 
 
 
-
+				Log.i("WEATHER", "c");
 				try {
 					request.setURI(new URI(formated));
 					HttpResponse response = client.execute(request);
@@ -598,31 +591,31 @@ public class MapActivity extends FragmentActivity {
 			if(response)
 			{				
 				if(this.icon.equals("i01d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i01d);
 				}
 				else if(this.icon.equals("i02d")){
 					imagen.setImageResource(R.drawable.i02d);
 				}
 				else if(this.icon.equals("i03d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i03d);
 				}
 				else if(this.icon.equals("i04d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i04d);
 				}
 				else if(this.icon.equals("i05d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i04d);
 				}
 				else if(this.icon.equals("i10d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i10d);
 				}
 				else if(this.icon.equals("i11d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i11d);
 				}
 				else if(this.icon.equals("i13d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i13d);
 				}
 				else if(this.icon.equals("i50d")){
-					imagen.setImageResource(R.drawable.i02d);
+					imagen.setImageResource(R.drawable.i50d);
 				}
 				else
 					Log.i("CLIMA", "else");
@@ -658,11 +651,10 @@ public class MapActivity extends FragmentActivity {
 				request.setURI(new URI(OTHERS_URL));
 				HttpResponse response = client.execute(request);
 
-				Log.i("OTHERS", "post fetchr");
+				
 
 				HttpEntity entity = response.getEntity();
-				Log.i(INFO,"response = " + response);
-				Log.i(INFO,"enttity = " + entity);
+				
 				this.responseStr = EntityUtils.toString(entity);
 				return true;
 			} catch (Exception e) {

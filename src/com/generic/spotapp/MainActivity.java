@@ -70,10 +70,8 @@ public class MainActivity extends Activity {
 	private FechaSQLiteHelper fechaSql;
 	private SQLiteDatabase dataFechaSql;
 	
-    
-	double lat = -33.4496866030000035;
-	double lng = -70.687233315499995;
-	
+
+	static double latNow, lngNow;
 	
 
 	@SuppressLint("NewApi")
@@ -263,11 +261,15 @@ public class MainActivity extends Activity {
 		if(isBetterLocation(locNetwork,locGps)){
 			Log.i("GPS", "onCreate-else: posicion prox: lat: " + locNetwork.getLatitude() + " long: " + locNetwork.getLongitude() );
 			new Proximos(10, locNetwork.getLatitude(), locNetwork.getLongitude(), this).execute();
+			latNow = locNetwork.getLatitude();
+			lngNow = locNetwork.getLongitude();
 			loc = locNetwork;
 		}
 		else{			
 			Log.i("GPS", "onCreate-if: posicion prox: lat: " + locGps.getLatitude() + " long: " + locGps.getLongitude() );
 			new Proximos(10, locGps.getLatitude(), locGps.getLongitude(), this).execute();
+			latNow = locGps.getLatitude();
+			lngNow = locGps.getLongitude();
 			loc = locGps;
 		}
 		getActualPosGps();
