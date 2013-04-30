@@ -13,7 +13,7 @@
     <string name="mode_map">Change mode</string>
     <string name="menu_change_normal">Mode normal</string>
     <string name="menu_change_hybrid">Mode hybrid</string>
-    <string name="menu_change_satelite">Mode satellite</string>
+    <string name="menu_change_satellite">Mode satellite</string>
     <string name="menu_change_terrain">Mode terrain</string>
     <string name="main_prox_avistamientos">Next ISS pass</string>
     <string name="txt_duracion">Duration: </string>
