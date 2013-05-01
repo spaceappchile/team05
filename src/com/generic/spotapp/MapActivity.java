@@ -590,31 +590,31 @@ public class MapActivity extends FragmentActivity {
 			
 			if(response)
 			{				
-				if(this.icon.equals("i01d")){
+				if(this.icon.equals("i01d") || this.icon.equals("i01n") ){
 					imagen.setImageResource(R.drawable.i01d);
 				}
-				else if(this.icon.equals("i02d")){
+				else if(this.icon.equals("i02d") || this.icon.equals("i02n")){
 					imagen.setImageResource(R.drawable.i02d);
 				}
-				else if(this.icon.equals("i03d")){
+				else if(this.icon.equals("i03d") || this.icon.equals("i03n")){
 					imagen.setImageResource(R.drawable.i03d);
 				}
-				else if(this.icon.equals("i04d")){
+				else if(this.icon.equals("i04d") || this.icon.equals("i04n")){
 					imagen.setImageResource(R.drawable.i04d);
 				}
-				else if(this.icon.equals("i05d")){
+				else if(this.icon.equals("i05d")|| this.icon.equals("i05n")){
 					imagen.setImageResource(R.drawable.i04d);
 				}
-				else if(this.icon.equals("i10d")){
+				else if(this.icon.equals("i10d") || this.icon.equals("i10n") ){
 					imagen.setImageResource(R.drawable.i10d);
 				}
-				else if(this.icon.equals("i11d")){
+				else if(this.icon.equals("i11d") || this.icon.equals("i11n")){
 					imagen.setImageResource(R.drawable.i11d);
 				}
-				else if(this.icon.equals("i13d")){
+				else if(this.icon.equals("i13d") || this.icon.equals("i13n")){
 					imagen.setImageResource(R.drawable.i13d);
 				}
-				else if(this.icon.equals("i50d")){
+				else if(this.icon.equals("i50d")|| this.icon.equals("i50n")){
 					imagen.setImageResource(R.drawable.i50d);
 				}
 				else
