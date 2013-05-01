@@ -25,13 +25,13 @@
      <string name="action_report">Reportar</string>
     
     <string name="dialog_rpt_title">Reportar</string>
-    <string name="dialog_rpt_message">Puedes var la estacion espacial internacional</string>
+    <string name="dialog_rpt_message">¿Puede ver la Estacion Espacial Internacional?</string>
     <string name="dialog_rpt_yes">Sí</string>
     <string name="dialog_rpt_no">No</string>
     
     <string name="event_calendar_title">Siguiente pasada de la ISS</string>
     <string name="event_calendar_description">La ISS pasará sobre ti</string>
-    <string name="event_calendar_error">Lo siente ,no se ha encontrado calendario disponible!</string>
+    <string name="event_calendar_error">Lo siento ,no se ha encontrado calendario disponible!</string>
     <string name="i_see">Puedo ver la estacion espacial internacional :)</string>
     <string name="msg_error">No se puede contactar con el servidor</string>
     <string name="msg_error1">Error al hacer el parse</string>
